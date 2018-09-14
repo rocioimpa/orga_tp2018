@@ -82,10 +82,10 @@ parameters_t getParams(int argc, char **argv){
     parameters_t receivedParameters;
 
     //defaults
-    receivedParameters.output = NULL;
-    receivedParameters.path_to_output = "output.txt";
-    receivedParameters.input = NULL;
-    receivedParameters.path_to_input = "input.txt";
+    receivedParameters.output = stdout;
+    receivedParameters.path_to_output = "";
+    receivedParameters.input = stdin;
+    receivedParameters.path_to_input = "";
     receivedParameters.action = "decode";
 
     // loop over all of the options
