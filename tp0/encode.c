@@ -12,7 +12,7 @@ unsigned char* encode(FILE*input,char*path) {
     int encodedChars = 0;
     int amountOfNewLines = 0;
 
-    if (!(input = fopen(path, "r"))) {
+    if ((input != stdin) && !(input = fopen(path, "r"))) {
         fprintf(stderr, "Can't open the file %s\n", path);
         exit(1);
     }
