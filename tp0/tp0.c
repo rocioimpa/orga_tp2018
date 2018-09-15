@@ -4,13 +4,8 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <memory.h>
-
-#define ERR_EMPTY -1
-#define ERR_INVALID_CHARS -2
-#define ERR_INVALID_FORMAT -3
-#define ERR_INVALID_FILE_PATH -4
-#define ERR_INVALID_PARAMETER -5
-#define ERR_INVALID_ACTION_TYPE -6
+#include "encode.h"
+#include "constants.h"
 
 typedef struct receivedParameters {
     FILE* output;
@@ -19,6 +14,8 @@ typedef struct receivedParameters {
     char* path_to_input;
     char* action;
 } parameters_t;
+
+const unsigned char encodingTable[]={"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"};
 
 static struct option long_options[] =
         {
@@ -36,10 +33,10 @@ void showError(int);
 void validate(int);
 void process(parameters_t);
 parameters_t getParams(int, char **);
-char* getFileExtension(char*);
 int checkForInvalidCharacters(char*);
 int parseAction(char*,char **);
 int checkForPath(char*,FILE*,char**,char*);
+void writeOutput(unsigned char *processedOutput,FILE*,char*);
 
 int checkForPath(char* path, FILE* file, char** path_to_save, char* type){
     if (path == NULL) return ERR_EMPTY;
@@ -51,7 +48,9 @@ int checkForPath(char* path, FILE* file, char** path_to_save, char* type){
         else file = stdin;
     }
 
-    if (!(file = fopen(path, "w"))) return ERR_INVALID_FILE_PATH;
+    char* mode = "r";
+    if (strcmp(type,"out")==0) mode = "w";
+    if (!(file = fopen(path, mode))) return ERR_INVALID_FILE_PATH;
 
     *path_to_save = path;
     return 0;
@@ -68,14 +67,14 @@ int checkForInvalidCharacters(char* path){
     return 0;
 }
 
- int parseAction(char* action, char **actionToSave){
-     if (action == NULL) return ERR_EMPTY;
-     if (strcmp(action, "decode") == 0 && (strcmp(action, "encode") == 0)) return ERR_INVALID_ACTION_TYPE;
+int parseAction(char* action, char **actionToSave){
+    if (action == NULL) return ERR_EMPTY;
+    if (strcmp(action, "decode") == 0 && (strcmp(action, "encode") == 0)) return ERR_INVALID_ACTION_TYPE;
 
-     *actionToSave = action;
-     printf("Action selected was %s",*actionToSave);
-     return 0;
- };
+    *actionToSave = action;
+
+    return 0;
+};
 
 parameters_t getParams(int argc, char **argv){
     int ch;
@@ -83,9 +82,9 @@ parameters_t getParams(int argc, char **argv){
 
     //defaults
     receivedParameters.output = stdout;
-    receivedParameters.path_to_output = "";
+    receivedParameters.path_to_output = NULL;
     receivedParameters.input = stdin;
-    receivedParameters.path_to_input = "";
+    receivedParameters.path_to_input = NULL;
     receivedParameters.action = "decode";
 
     // loop over all of the options
@@ -172,9 +171,29 @@ void showError(int errorCode) {
 }
 
 void process(parameters_t parameters){
-    printf("Processing input...\n");
+    if(strcmp(parameters.action,"encode")==0) {
+        writeOutput(encode(parameters.input,parameters.path_to_input),parameters.output,parameters.path_to_output);
+    }
 }
 
+void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
+
+    output = fopen(path, "w");
+
+    if (output != NULL) {
+        while (*processedOutput != '\0'){
+            if (!(fprintf(output,"%c",*processedOutput))) {
+                fprintf(stderr, "Error when writing output to file %s\n", path);
+                exit(1);
+            }
+            ++processedOutput;
+        }
+        fclose(output);
+    } else {
+        fprintf(stderr, "Unable to open or create output file %s\n", path);
+        exit(1);
+    }
+}
 
 int main(int argc, char *argv[]){
     int result = 0;
