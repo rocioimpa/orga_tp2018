@@ -172,7 +172,7 @@ void showError(int errorCode) {
 }
 
 void process(parameters_t parameters){
-    printf("Processing input...");
+    printf("Processing input...\n");
 }
 
 
