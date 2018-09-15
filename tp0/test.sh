@@ -32,7 +32,7 @@ for file in "${file_base[@]}"; do
     printf "Testing against %s\n" "$file_in"
 
     # Run application, redirect in file to app, and output to out file
-    "./$bin" < "$file_in" > "$file_out_tst"
+    "./$bin" -a "encode" -i "$file_in" -o "$file_out_tst"
 
     # Execute diff
     $diff "$file_out_tst" "$file_out_val"
