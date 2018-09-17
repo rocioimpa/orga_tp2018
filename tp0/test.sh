@@ -54,13 +54,18 @@ test_file() {
 }
 
 # An array, do not have to declare it, but is supposedly faster
-declare -a encode_files=("test/M" "test/Ma")
-#declare -a decode_files=("test/")
+declare -a encode_files=("test/encode/M" "test/encode/Ma")
+declare -a decode_files=("test/decode/Man")
 
 # Loop the array
 for file in "${encode_files[@]}"; do
     test_file "encode" "$file"
 done
+
+for file in "${decode_files[@]}"; do
+    test_file "decode" "$file"
+done
+
 
 # Clean exit with status 0
 exit 0
