@@ -85,7 +85,7 @@ parameters_t getParams(int argc, char **argv){
     receivedParameters.path_to_output = NULL;
     receivedParameters.input = stdin;
     receivedParameters.path_to_input = NULL;
-    receivedParameters.action = "decode";
+    receivedParameters.action = "encode";
 
     // loop over all of the options
     while ((ch = getopt_long(argc, argv, "hVo:i:a:", long_options, NULL)) != -1) {
