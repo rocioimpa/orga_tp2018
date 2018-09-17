@@ -12,10 +12,14 @@ unsigned char* encode(FILE*input,char*path) {
     int encodedChars = 0;
     int amountOfNewLines = 0;
 
-    if ((input != stdin) && !(input = fopen(path, "r"))) {
+
+    if(path) input =  fopen(path, "r");
+
+    if (!input) {
         fprintf(stderr, "Can't open the file %s\n", path);
         exit(1);
     }
+
 
     while (!feof(input)) {
         if (encodedChars + 4 >= sizeof(encodedOutput)) {

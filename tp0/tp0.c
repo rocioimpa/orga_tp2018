@@ -178,7 +178,7 @@ void process(parameters_t parameters){
 
 void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
 
-    if(output != stdout) output = fopen(path, "w");
+    if(path) output = fopen(path, "w");
 
     if (output != NULL) {
         while (*processedOutput != '\0'){
