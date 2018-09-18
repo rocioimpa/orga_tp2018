@@ -6,3 +6,5 @@
 unsigned char* encode(FILE*,char*);
 int readInput(FILE*, unsigned char*);
 int encodeChars(unsigned const char[], unsigned char[], int);
+int exceedsLineSize(int);
+void addNewLine(unsigned char*, int);

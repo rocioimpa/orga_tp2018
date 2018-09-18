@@ -12,14 +12,12 @@ unsigned char* encode(FILE*input,char*path) {
     int encodedChars = 0;
     int amountOfNewLines = 0;
 
-
     if(path) input =  fopen(path, "r");
 
     if (!input) {
         fprintf(stderr, "Can't open the file %s\n", path);
         exit(1);
     }
-
 
     while (!feof(input)) {
         if (encodedChars + 4 >= sizeof(encodedOutput)) {
@@ -29,10 +27,22 @@ unsigned char* encode(FILE*input,char*path) {
         if (length > 0) {
             encodedChars += encodeChars(buffer, encodedOutput + encodedChars, length);
             amountOfNewLines += 4;
+            if(exceedsLineSize(amountOfNewLines) == 1){
+                addNewLine(encodedOutput,encodedChars);
+                amountOfNewLines = 0;
+            }
         }
     }
-
     return encodedOutput;
+}
+
+int exceedsLineSize(int amountOfNewLines) {
+    return (amountOfNewLines == 76) ? 1:0;
+}
+
+void addNewLine(unsigned char* encodedOutput, int encodedChars){
+    encodedOutput[encodedChars] = '\n';
+    encodedChars++;
 }
 
 int readInput(FILE* input, unsigned char* buff) {
@@ -41,9 +51,6 @@ int readInput(FILE* input, unsigned char* buff) {
     for (i = 0; i < BLOCK_SIZE_INPUT; ++i) {
         currentChar = fgetc(input);
         if (!ferror(input)) {
-            if (currentChar == '\n') {
-                currentChar = fgetc(input);
-            }
             if (currentChar != EOF) {
                 buff[i] = currentChar;
             } else {
