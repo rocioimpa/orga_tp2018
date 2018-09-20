@@ -1,9 +1,3 @@
-//
-// Created by rocio on 20/09/18.
-//
-
-#include <bits/types/FILE.h>
-
 #ifndef TP0_DECODE_H
 #define TP0_DECODE_H
 

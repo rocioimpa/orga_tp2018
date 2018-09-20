@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include "constants.h"
 #include "decode.h"
 
 unsigned char* decode(FILE*input, char*path){
