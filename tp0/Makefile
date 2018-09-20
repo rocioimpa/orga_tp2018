@@ -1,10 +1,10 @@
 CC := gcc
 CFLAGS := -g -Wall
 
-tp0: tp0.c encode.o
+tp0: tp0.c encode.o decode.o
 	$(CC) $(CFLAGS) $(OBJS) $^ -o $@ -lm
 
-encode: encode.c
+encode: encode.c decode.o
 	$(CC) $(CFLAGS) $(OBJS) $^ -o $@
 
 clean:

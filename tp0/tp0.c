@@ -27,16 +27,8 @@ static struct option long_options[] =
                 {NULL, 0, NULL, 0}
         };
 
-void showVersion(void);
-void showHelp();
-void showError(int);
-void validate(int);
 void process(parameters_t);
 parameters_t getParams(int, char **);
-int checkForInvalidCharacters(char*);
-int parseAction(char*,char **);
-int checkForPath(char*,FILE*,char**,char*);
-void writeOutput(unsigned char *processedOutput,FILE*,char*);
 
 int checkForPath(char* path, FILE* file, char** path_to_save, char* type){
     if (path == NULL) return ERR_EMPTY;
@@ -44,12 +36,12 @@ int checkForPath(char* path, FILE* file, char** path_to_save, char* type){
     if(checkForInvalidCharacters(path) == -1) return ERR_INVALID_CHARS;
 
     if (strcmp(path, "-") == 0){
-        if(strcmp(type,"out")==0) file = stdout;
-        else file = stdin;
+        if (strcmp(type,"out") == 0) file = stdout;
+        if (strcmp(type,"in") == 0) file = stdin;
     }
 
     char* mode = "r";
-    if (strcmp(type,"out")==0) mode = "w";
+    if (strcmp(type,"out") ==0 ) mode = "w";
     if (!(file = fopen(path, mode))) return ERR_INVALID_FILE_PATH;
 
     *path_to_save = path;
@@ -77,6 +69,7 @@ int parseAction(char* action, char **actionToSave){
 };
 
 parameters_t getParams(int argc, char **argv){
+
     int ch;
     parameters_t receivedParameters;
 
@@ -120,6 +113,12 @@ parameters_t getParams(int argc, char **argv){
                 exit(1);
         }
     }
+
+    if(!(stdin)) {
+    	showHelp();
+    	exit(1);
+    }
+
     return receivedParameters;
 
 }
@@ -174,6 +173,25 @@ void process(parameters_t parameters){
     if(strcmp(parameters.action,"encode")==0) {
         writeOutput(encode(parameters.input,parameters.path_to_input),parameters.output,parameters.path_to_output);
     }
+}
+
+int readInput(FILE* input, unsigned char* buff, int buffSize) {
+    int i;
+    int currentChar;
+    for (i = 0; i < buffSize; ++i) {
+        currentChar = fgetc(input);
+        if (!ferror(input)) {
+            if (currentChar != EOF) {
+                buff[i] = currentChar;
+            } else {
+                return i;
+            }
+        } else {
+            fprintf(stderr, "An error occurred when reading input.");
+            exit(1);
+        }
+    }
+    return buffSize;
 }
 
 void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
