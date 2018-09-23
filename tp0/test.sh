@@ -48,14 +48,14 @@ test_file() {
     rm $file_out_tst
 
     # Pause by prompt
-    read -p "Enter a to abort, anything else to continue: " input_data
+    #read -p "Enter a to abort, anything else to continue: " input_data
     # Iff input is "a" then abort
-    [ "$input_data" == "a" ] && break
+    #[ "$input_data" == "a" ] && return 1
 }
 
 # An array, do not have to declare it, but is supposedly faster
-declare -a encode_files=("test/encode/M" "test/encode/Ma")
-declare -a decode_files=("test/decode/Man")
+declare -a encode_files=("test/encode/M" "test/encode/Ma" "test/encode/zero" "test/encode/yes")
+declare -a decode_files=("test/decode/Man" )
 
 # Loop the array
 for file in "${encode_files[@]}"; do

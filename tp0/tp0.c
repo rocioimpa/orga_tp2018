@@ -184,8 +184,8 @@ void showError(int errorCode) {
 }
 
 void process(parameters_t parameters){
-    if(strcmp(parameters.action,"encode")==0) {
-        writeOutput(encode(parameters.input,parameters.path_to_input),parameters.output,parameters.path_to_output);
+    if(strcmp(parameters.action,"encode") == 0) {
+        encode(parameters.input, parameters.path_to_input, parameters.output,parameters.path_to_output);
     }
     if(strcmp(parameters.action, "decode") == 0) {
         decode(parameters.input, parameters.path_to_input, parameters.output, parameters.path_to_output);

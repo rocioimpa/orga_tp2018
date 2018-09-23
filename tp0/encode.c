@@ -4,14 +4,15 @@
 #include "constants.h"
 
 
-unsigned char* encode(FILE*input,char*path) {
+void encode(FILE*input,char*path,FILE * output, char * path_out) {
     unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
-    unsigned char* encodedOutput = malloc(BLOCK_SIZE_OUTPUT * sizeof(char));
+    unsigned char encodedOutput[BLOCK_SIZE_INPUT_DECODING];
     int length;
-    int encodedChars = 0;
-    int amountOfNewLines = 0;
+    int charsInLine = 0;
 
     if(path) input = fopen(path, "r");
+
+    if(path_out) output = fopen(path_out, "w");
 
     if (!input) {
         fprintf(stderr, "Can't open the file %s\n", path);
@@ -19,32 +20,27 @@ unsigned char* encode(FILE*input,char*path) {
     }
 
     while (!feof(input)) {
-        if (encodedChars + 4 >= sizeof(encodedOutput)) {
-            encodedOutput = realloc(encodedOutput, BLOCK_SIZE_OUTPUT * ((encodedChars / BLOCK_SIZE_OUTPUT) + 1) * sizeof(char));
-        }
 
         length = readInput(input, buffer,BLOCK_SIZE_INPUT_ENCODING);
         
-	if (length > 0) {
-            encodedChars += encodeChars(buffer, encodedOutput + encodedChars, length);
-            amountOfNewLines += 4;
-            if(exceedsLineSize(amountOfNewLines) == 1){
-                amountOfNewLines = 0;
-                encodedOutput[encodedChars] = '\n';
-                encodedChars++;
+        if (length > 0) {
+            encodeChars(buffer, encodedOutput, length);
+            write_partial(encodedOutput, output, path_out);
+            charsInLine += 4;
+            if(exceedsLineSize(charsInLine) == 1){
+                charsInLine = 0;
+                encodedOutput[0] = '\n';
+                encodedOutput[1] = '\0';
+                write_partial(encodedOutput, output, path_out);
             }
         }    
-	
-	if (amountOfNewLines != 0) {
-        encodedOutput[encodedChars] = '\n';
-    	}
+
 
     }
-    return encodedOutput;
 }
 
-int exceedsLineSize(int amountOfNewLines) {
-    return (amountOfNewLines == 76) ? 1:0;
+int exceedsLineSize(int charsInLine) {
+    return (charsInLine == 76) ? 1:0;
 }
 
 int encodeChars(unsigned const char input[], unsigned char output[], int length) {
