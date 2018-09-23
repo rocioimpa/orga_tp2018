@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <memory.h>
 #include "encode.h"
+#include "decode.h"
 #include "constants.h"
 
 typedef struct receivedParameters {
@@ -16,6 +17,19 @@ typedef struct receivedParameters {
 } parameters_t;
 
 const unsigned char encodingTable[]={"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"};
+const char decodingTable[]={
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,62,-1,-1,-1,63,52,53,
+                                    54,55,56,57,58,59,60,61,-1,-1,-1,-3,-1,-1,-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                                    10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,-1,-1,-1,-1,-1,-1,26,27,28,
+                                    29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                    -1,-1,-1,-1,-1,-1
+                                };
 
 static struct option long_options[] =
         {
@@ -173,6 +187,9 @@ void process(parameters_t parameters){
     if(strcmp(parameters.action,"encode")==0) {
         writeOutput(encode(parameters.input,parameters.path_to_input),parameters.output,parameters.path_to_output);
     }
+    if(strcmp(parameters.action, "decode") == 0) {
+        decode(parameters.input, parameters.path_to_input, parameters.output, parameters.path_to_output);
+    }
 }
 
 int readInput(FILE* input, unsigned char* buff, int buffSize) {
@@ -207,6 +224,24 @@ void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
             ++processedOutput;
         }
         fclose(output);
+    } else {
+        fprintf(stderr, "Unable to open or create output file %s\n", path);
+        exit(1);
+    }
+}
+
+void write_partial(unsigned char* processedOutput, FILE* output, char* path) {
+
+    if(path) output = fopen(path, "w");
+
+    if (output != NULL) {
+        while (*processedOutput != '\0'){
+            if (!(fprintf(output,"%c",*processedOutput))) {
+                fprintf(stderr, "Error when writing output to file %s\n", path);
+                exit(1);
+            }
+            ++processedOutput;
+        }
     } else {
         fprintf(stderr, "Unable to open or create output file %s\n", path);
         exit(1);
