@@ -10,6 +10,8 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
 
     if(path) input = fopen(path, "r");
 
+    if(path_out) output = fopen(path_out, "w");
+
     if (!input) {
         fprintf(stderr, "Can't open the file %s\n", path);
         exit(1);
@@ -23,7 +25,7 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
         	write_partial(decoded_output, output, path_out);
         }
     }
-    
+
     fclose(output);
 }
 

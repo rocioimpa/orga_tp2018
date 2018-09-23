@@ -232,8 +232,6 @@ void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
 
 void write_partial(unsigned char* processedOutput, FILE* output, char* path) {
 
-    if(path) output = fopen(path, "w");
-
     if (output != NULL) {
         while (*processedOutput != '\0'){
             if (!(fprintf(output,"%c",*processedOutput))) {
