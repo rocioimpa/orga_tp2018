@@ -21,7 +21,7 @@ void encode(FILE*input,char*path,FILE * output, char * path_out) {
 
     while (!feof(input)) {
 
-        length = readInput(input, buffer,BLOCK_SIZE_INPUT_ENCODING);
+        length = readInput(input, buffer,BLOCK_SIZE_INPUT_ENCODING,0);
         
         if (length > 0) {
             encodeChars(buffer, encodedOutput, length);

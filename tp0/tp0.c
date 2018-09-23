@@ -185,21 +185,28 @@ void showError(int errorCode) {
 
 void process(parameters_t parameters){
     if(strcmp(parameters.action,"encode") == 0) {
-        encode(parameters.input, parameters.path_to_input, parameters.output,parameters.path_to_output);
+        encode(parameters.input,parameters.path_to_input,parameters.output,parameters.path_to_output);
     }
     if(strcmp(parameters.action, "decode") == 0) {
         decode(parameters.input, parameters.path_to_input, parameters.output, parameters.path_to_output);
     }
 }
 
-int readInput(FILE* input, unsigned char* buff, int buffSize) {
+int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
     int i;
     int currentChar;
     for (i = 0; i < buffSize; ++i) {
         currentChar = fgetc(input);
         if (!ferror(input)) {
             if (currentChar != EOF) {
-                buff[i] = currentChar;
+                if(!decode) buff[i] = currentChar;
+                else{
+                    if (currentChar == '\n') {
+                        i--;
+                        continue;
+                    }
+                    buff[i] = currentChar;
+                }
             } else {
                 return i;
             }
@@ -235,6 +242,7 @@ void write_partial(unsigned char* processedOutput, FILE* output, char* path) {
     if (output != NULL) {
         while (*processedOutput != '\0'){
             if (!(fprintf(output,"%c",*processedOutput))) {
+                printf("%c\n", *processedOutput);
                 fprintf(stderr, "Error when writing output to file %s\n", path);
                 exit(1);
             }

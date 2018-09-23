@@ -18,7 +18,7 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
     }
 
     while(!feof(input)){
-        length = readInput(input, buffer,BLOCK_SIZE_INPUT_DECODING);
+        length = readInput(input, buffer,BLOCK_SIZE_INPUT_DECODING,1);
         chars_read += length;
         if(length > 0){
             decodeChars(buffer, decoded_output);

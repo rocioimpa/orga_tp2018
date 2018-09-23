@@ -55,7 +55,7 @@ test_file() {
 
 # An array, do not have to declare it, but is supposedly faster
 declare -a encode_files=("test/encode/M" "test/encode/Ma" "test/encode/zero" "test/encode/yes")
-declare -a decode_files=("test/decode/Man" )
+declare -a decode_files=("test/decode/Man" "test/decode/yes" "test/decode/zero")
 
 # Loop the array
 for file in "${encode_files[@]}"; do
