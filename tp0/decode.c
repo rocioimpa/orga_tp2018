@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "decode.h"
 
@@ -23,7 +24,7 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
         if(length > 0){
             decodeChars(buffer, decoded_output);
         	write_partial(decoded_output, output, path_out);
-        }
+        } 
     }
 
     fclose(output);
@@ -49,4 +50,15 @@ int decodeChars(unsigned const char input[], unsigned char output[]){
 	}
 	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
 	return 3;
+}
+
+int isValid(unsigned char currentChar){
+	int i = 0;
+	while (i < strlen((const char*)encodingTable)){
+		if((currentChar == '=')||(encodingTable[i] == currentChar)){
+			return 1;
+		}
+		i++;
+	}
+	return 0;
 }

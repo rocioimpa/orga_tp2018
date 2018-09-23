@@ -25,7 +25,6 @@
 	int parseAction(char*,char **);
 	int checkForPath(char*,FILE*,char**,char*);
 	int readInput(FILE*, unsigned char*,int,int);
-	void writeOutput(unsigned char *processedOutput,FILE*,char*);
 	void write_partial(unsigned char* processedOutput, FILE* output, char* path);
 
 #endif //TP0_CONSTANTS_H
