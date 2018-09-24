@@ -196,10 +196,7 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
     int i;
     int currentChar;
     for (i = 0; i < buffSize; ++i) {
-        if(!(currentChar = fgetc(input))){
-        	fprintf(stderr, "Unable to decode: invalid sequence. Program will terminate.\n");
-        	exit(1);
-        }
+        currentChar = fgetc(input);
 
         if (!ferror(input)) {
             if (currentChar != EOF) {
