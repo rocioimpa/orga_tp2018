@@ -20,6 +20,10 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
     while(!feof(input)){
         length = readInput(input, buffer,BLOCK_SIZE_INPUT_DECODING,1);
         chars_read += length;
+        if (length < BLOCK_SIZE_INPUT_DECODING) {
+        	fprintf(stderr, "Can't finish decoding file %s: wrong length\n", path);
+        	break;
+        }
         if(length > 0){
             decodeChars(buffer, decoded_output);
         	write_partial(decoded_output, output, path_out);
