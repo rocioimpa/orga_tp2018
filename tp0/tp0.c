@@ -197,6 +197,7 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
     int currentChar;
     for (i = 0; i < buffSize; ++i) {
         currentChar = fgetc(input);
+
         if (!ferror(input)) {
             if (currentChar != EOF) {
                 if(!decode) buff[i] = currentChar;
@@ -205,6 +206,10 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
                         i--;
                         continue;
                     }
+                    if(isValid(currentChar)==0){
+				    	fprintf(stderr, "Unable to decode: invalid character. Program will terminate.\n");
+       					exit(1);                    	
+        			}
                     buff[i] = currentChar;
                 }
             } else {
@@ -216,26 +221,8 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
             exit(1);
         }
     }
+
     return buffSize;
-}
-
-void writeOutput(unsigned char* processedOutput,FILE* output,char* path) {
-
-    if(path) output = fopen(path, "w");
-
-    if (output != NULL) {
-        while (*processedOutput != '\0'){
-            if (!(fprintf(output,"%c",*processedOutput))) {
-                fprintf(stderr, "Error when writing output to file %s\n", path);
-                exit(1);
-            }
-            ++processedOutput;
-        }
-        fclose(output);
-    } else {
-        fprintf(stderr, "Unable to open or create output file %s\n", path);
-        exit(1);
-    }
 }
 
 void write_partial(unsigned char* processedOutput, FILE* output, char* path) {

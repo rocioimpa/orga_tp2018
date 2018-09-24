@@ -3,5 +3,6 @@
 
 	void decode(FILE*,char*, FILE *, char *);
 	int decodeChars(unsigned const char[], unsigned char[]);
-	
+	int isValid(unsigned char);
+
 #endif //TP0_DECODE_H
