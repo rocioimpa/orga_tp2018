@@ -220,7 +220,6 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
             exit(1);
         }
     }
-
     return buffSize;
 }
 

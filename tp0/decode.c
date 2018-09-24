@@ -21,7 +21,7 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
     while(!feof(input)){
         length = readInput(input, buffer,BLOCK_SIZE_INPUT_DECODING,1);
         chars_read += length;
-        if (length < BLOCK_SIZE_INPUT_DECODING) {
+        if (length && (length < BLOCK_SIZE_INPUT_DECODING)) {
         	fprintf(stderr, "Can't finish decoding file %s: wrong length\n", path);
         	break;
         }
