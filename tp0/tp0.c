@@ -213,7 +213,6 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
                     buff[i] = currentChar;
                 }
             } else {
-                printf("buffer: %s\n", buff);
                 return i;
             }
         } else {
