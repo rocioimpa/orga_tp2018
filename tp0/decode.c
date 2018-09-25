@@ -34,7 +34,7 @@ void decode(FILE * input, char * path, FILE * output, char * path_out){
     fclose(output);
 }
 
-void decodeChars(unsigned const char input[], unsigned char output[]){
+int decodeChars(unsigned const char input[], unsigned char output[]){
 	char decodedOutput[4] = {};
 	decodedOutput[0] = decodingTable[input[0]];
 	decodedOutput[1] = decodingTable[input[1]];
@@ -44,13 +44,16 @@ void decodeChars(unsigned const char input[], unsigned char output[]){
 	output[0] = ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
 	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
 		output[1] = '\0';
-		output[2] = '\0';	
+		output[2] = '\0';
+		return 1;	
 	}
 	output[1] = (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
 	if(decodedOutput[3] == EQUALS){
 		output[2] = '\0';
+		return 2;
 	}
 	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+	return 3;
 }
 
 int isValid(unsigned char currentChar){
