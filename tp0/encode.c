@@ -43,7 +43,7 @@ int exceedsLineSize(int charsInLine) {
     return (charsInLine == 76) ? 1:0;
 }
 
-int encodeChars(unsigned const char input[], unsigned char output[], int length) {
+void encodeChars(unsigned const char input[], unsigned char output[], int length) {
     if (length == 3) {
         output[0] = encodingTable[input[0] >> 2];
         output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
@@ -60,5 +60,4 @@ int encodeChars(unsigned const char input[], unsigned char output[], int length)
         output[2] = '=';
         output[3] = '=';
     }
-    return 4;
 }
