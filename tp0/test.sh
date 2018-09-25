@@ -1,3 +1,6 @@
+## PARA NETBSD
+#!/usr/pkg/bin/bash
+
 #!/bin/bash
 
 # If number of arguments less then 1; print usage and exit
