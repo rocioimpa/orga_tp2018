@@ -6,7 +6,8 @@
 
 void encode(FILE*input,char*path,FILE * output, char * path_out) {
     unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
-    unsigned char encodedOutput[BLOCK_SIZE_INPUT_DECODING];
+    unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
+    encodedOutput[4] = '\0';
     int length;
     int charsInLine = 0;
 
