@@ -5,8 +5,8 @@
 #include "decode.h"
 
 void decode(FILE * input, char * path, FILE * output, char * path_out){
-	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];
-	unsigned char decoded_output[BLOCK_SIZE_INPUT_DECODING];
+	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING+1];
+	unsigned char decoded_output[BLOCK_SIZE_INPUT_DECODING+1];
 	decoded_output[4] = '\0';
 	int chars_read = 0, length;
 
