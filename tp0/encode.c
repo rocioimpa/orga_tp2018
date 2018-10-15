@@ -5,7 +5,7 @@
 
 
 void encode(FILE*input,char*path,FILE * output, char * path_out) {
-    unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
+    unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING+1];
     unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
     encodedOutput[4] = '\0';
     int length;
@@ -23,7 +23,7 @@ void encode(FILE*input,char*path,FILE * output, char * path_out) {
     while (!feof(input)) {
 
         length = readInput(input, buffer,BLOCK_SIZE_INPUT_ENCODING,0);
-        
+        //printf("buffer: %s\n", buffer);        
         if (length > 0) {
             encodeChars(buffer, encodedOutput, length);
             write_partial(encodedOutput, output, path_out);

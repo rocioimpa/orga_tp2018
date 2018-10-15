@@ -197,9 +197,8 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
     int currentChar;
     for (i = 0; i < buffSize; ++i) {
         currentChar = fgetc(input);
-
         if (!ferror(input)) {
-            if (currentChar != EOF) {
+            if ((currentChar != EOF)) {
                 if(!decode) buff[i] = currentChar;
                 else{
                     if (currentChar == '\n') {
@@ -220,6 +219,7 @@ int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
             exit(1);
         }
     }
+    buff[buffSize] = '\0';
     return buffSize;
 }
 
