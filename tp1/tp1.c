@@ -185,25 +185,27 @@ void showError(int errorCode) {
 
 void process(parameters_t parameters){
     if(parameters.path_to_input != NULL){
-        parameters.input = fopen(parameters.path_to_input,"rb");
+        parameters.input = fopen(parameters.path_to_input,"r");
     }
 
     int infd = fileno(parameters.input);
     
     if(parameters.path_to_output != NULL){
-        parameters.output = fopen(parameters.path_to_output,"wb");
+        parameters.output = fopen(parameters.path_to_output,"w");
     }
 
     int outfd = fileno(parameters.output);
 
     if(strcmp(parameters.action,"encode") == 0) {
-        encode(parameters.input,parameters.path_to_input,parameters.output,parameters.path_to_output);
-        //base64_encode(infd,outfd);
+        base64_encode(infd,outfd);
     }
     if(strcmp(parameters.action, "decode") == 0) {
         decode(parameters.input, parameters.path_to_input, parameters.output, parameters.path_to_output);
         //base64_decode(infd,outfd);
     }
+
+    fclose(parameters.input);
+    fclose(parameters.output);
 }
 
 int main(int argc, char *argv[]){

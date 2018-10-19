@@ -5,7 +5,6 @@ int base64_encode(int infd, int outfd);
 int base64_decode(int infd, int outfd);
 extern const char* errmsg[];
 
-void encode(FILE*,char*,FILE*,char*);
 int encodeChars(unsigned const char[], unsigned char[], int);
 int exceedsLineSize(int);
 void decode(FILE*,char*, FILE *, char *);

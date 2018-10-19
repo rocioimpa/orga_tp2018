@@ -6,10 +6,28 @@
 #include "base64.h"
 
 int base64_encode(int infd, int outfd){
-	printf("File descriptor input is : %d\n", infd);
-	printf("File descriptor output is : %d\n", outfd);
-	ssize_t aa = write(outfd,"test",4);
-	return 0;
+
+    unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
+    unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
+    int charsInLine = 0;
+    int length = read(infd,buffer,BLOCK_SIZE_INPUT_ENCODING);
+    encodedOutput[4] = '\0';
+
+    while ( length > 0) {
+        encodeChars(buffer,encodedOutput,length);
+
+        charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
+        if (exceedsLineSize(charsInLine) == 1) {
+            write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
+            write(outfd,"\n",1);
+            charsInLine = 0;
+        } else {
+            write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
+        }
+        length = read(infd,buffer,BLOCK_SIZE_INPUT_ENCODING);
+    }
+
+	return 0; //TODO: Arreglar output por archivo (problema con la codificacion)
 }
 
 int base64_decode(int infd, int outfd){
@@ -82,39 +100,6 @@ int isValid(unsigned char currentChar){
 	return 0;
 }
 
-void encode(FILE*input,char*path,FILE * output, char * path_out) {
-    unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING+1];
-    unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
-    encodedOutput[4] = '\0';
-    int length;
-    int charsInLine = 0;
-
-    if(path) input = fopen(path, "r");
-
-    if(path_out) output = fopen(path_out, "w");
-
-    if (!input) {
-        fprintf(stderr, "Can't open the file %s\n", path);
-        exit(1);
-    }
-
-    while (!feof(input)) {
-
-        length = readInput(input, buffer,BLOCK_SIZE_INPUT_ENCODING,0);
-        
-        if (length > 0) {
-            encodeChars(buffer, encodedOutput, length);
-            write_partial(encodedOutput, output, path_out);
-            charsInLine += 4;
-            if(exceedsLineSize(charsInLine) == 1){
-                charsInLine = 0;
-                encodedOutput[0] = '\n';
-                encodedOutput[1] = '\0';
-                write_partial(encodedOutput, output, path_out);
-            }
-        }    
-    }
-}
 
 int exceedsLineSize(int charsInLine) {
     return (charsInLine == 76) ? 1:0;
