@@ -16,13 +16,13 @@ int base64_encode(int infd, int outfd){
         encodeChars(buffer,encodedOutput,length);
 
         charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
+        write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
+
         if (exceedsLineSize(charsInLine) == 1) {
-            write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
             write(outfd,"\n",1);
             charsInLine = 0;
-        } else {
-            write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
-        }
+	    }
+
         length = read(infd,buffer,BLOCK_SIZE_INPUT_ENCODING);
     }
 
@@ -54,8 +54,6 @@ int encodeChars(unsigned const char input[], unsigned char output[], int length)
 }
 
 int base64_decode(int infd, int outfd) {
-	printf("File descriptor input is : %d\n", infd);
-	printf("File descriptor output is : %d\n", outfd);
 	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];
 	unsigned char decoded_output[BLOCK_SIZE_OUTPUT_DECODING];
 	int charsDecoded = 0;
@@ -75,11 +73,10 @@ int base64_decode(int infd, int outfd) {
 		
 		if (exceedsLineSize(charsInLine) == 1) {
 			length = read(infd,buffer,1);
-			length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
 			charsInLine = 0;
-		} else {
-			length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
-		}
+		} 
+		
+		length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
 	}
 
 	return 0;
