@@ -14,9 +14,8 @@ int base64_encode(int infd, int outfd){
 
     while ( length > 0) {
         encodeChars(buffer,encodedOutput,length);
-
-        charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
         write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
+        charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
 
         if (exceedsLineSize(charsInLine) == 1) {
             write(outfd,"\n",1);
@@ -75,7 +74,7 @@ int base64_decode(int infd, int outfd) {
 			length = read(infd,buffer,1);
 			charsInLine = 0;
 		} 
-		
+
 		length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
 	}
 
