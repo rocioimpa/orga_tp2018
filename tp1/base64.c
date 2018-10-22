@@ -6,7 +6,6 @@
 #include "base64.h"
 
 int base64_encode(int infd, int outfd){
-
     unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
     unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
     int charsInLine = 0;
@@ -27,79 +26,8 @@ int base64_encode(int infd, int outfd){
         length = read(infd,buffer,BLOCK_SIZE_INPUT_ENCODING);
     }
 
-	return 0; //TODO: Arreglar output por archivo (problema con la codificacion)
+	return 0; 
 }
-
-int base64_decode(int infd, int outfd){
-	printf("File descriptor input is : %d\n", infd);
-	printf("File descriptor output is : %d\n", outfd);
-	return 0;
-}
-
-void decode(FILE * input, char * path, FILE * output, char * path_out){
-	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING+1];
-	unsigned char decoded_output[BLOCK_SIZE_INPUT_DECODING+1];
-	decoded_output[4] = '\0';
-	int chars_read = 0, length;
-
-    if(path) input = fopen(path, "r");
-
-    if(path_out) output = fopen(path_out, "w");
-
-    if (!input) {
-        fprintf(stderr, "Can't open the file %s\n", path);
-        exit(1);
-    }
-
-    while(!feof(input)){
-        length = readInput(input, buffer,BLOCK_SIZE_INPUT_DECODING,1);
-        chars_read += length;
-        if (length && (length < BLOCK_SIZE_INPUT_DECODING)) {
-        	fprintf(stderr, "Can't finish decoding file %s: wrong length\n", path);
-        	break;
-        }
-        if(length > 0){
-            decodeChars(buffer, decoded_output);
-        	write_partial(decoded_output, output, path_out);
-        } 
-    }
-
-    fclose(output);
-}
-
-int decodeChars(unsigned const char input[], unsigned char output[]){
-	char decodedOutput[4] = {};
-	decodedOutput[0] = decodingTable[input[0]];
-	decodedOutput[1] = decodingTable[input[1]];
-	decodedOutput[2] = decodingTable[input[2]];
-	decodedOutput[3] = decodingTable[input[3]];
-
-	output[0] = ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
-	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
-		output[1] = '\0';
-		output[2] = '\0';
-		return 1;	
-	}
-	output[1] = (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
-	if(decodedOutput[3] == EQUALS){
-		output[2] = '\0';
-		return 2;
-	}
-	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
-	return 3;
-}
-
-int isValid(unsigned char currentChar){
-	int i = 0;
-	while (i < strlen((const char*)encodingTable)){
-		if((currentChar == '=')||(encodingTable[i] == currentChar)){
-			return 1;
-		}
-		i++;
-	}
-	return 0;
-}
-
 
 int exceedsLineSize(int charsInLine) {
     return (charsInLine == 76) ? 1:0;
@@ -125,51 +53,56 @@ int encodeChars(unsigned const char input[], unsigned char output[], int length)
     return 4;
 }
 
-int readInput(FILE* input, unsigned char* buff, int buffSize, int decode) {
-    int i;
-    int currentChar;
-    for (i = 0; i < buffSize; ++i) {
-        currentChar = fgetc(input);
+int base64_decode(int infd, int outfd) {
+	printf("File descriptor input is : %d\n", infd);
+	printf("File descriptor output is : %d\n", outfd);
+	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];
+	unsigned char decoded_output[BLOCK_SIZE_OUTPUT_DECODING];
+	int charsDecoded = 0;
+	int charsInLine = 0;
+	int length = 0;
 
-        if (!ferror(input)) {
-            if (currentChar != EOF) {
-                if(!decode) buff[i] = currentChar;
-                else{
-                    if (currentChar == '\n') {
-                        i--;
-                        continue;
-                    }
-                    if(isValid(currentChar)==0){
-                        fprintf(stderr, "Unable to decode: invalid character. Program will terminate.\n");
-                        exit(1);                        
-                    }
-                    buff[i] = currentChar;
-                }
-            } else {
-                return i;
-            }
-        } else {
-            fprintf(stderr, "An error occurred when reading input.");
-            exit(1);
-        }
-    }
-    buff[buffSize] = '\0';
-    return buffSize;
+	length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
+
+	while ( length > 0 ) {
+		if((charsDecoded = decodeChars(buffer,decoded_output)) < 0){
+			fprintf(stderr,"Error decoding characters");
+			return -1;
+		}
+
+		write(outfd, decoded_output, charsDecoded);
+		charsInLine += BLOCK_SIZE_INPUT_DECODING;
+		
+		if (exceedsLineSize(charsInLine) == 1) {
+			length = read(infd,buffer,1);
+			length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
+			charsInLine = 0;
+		} else {
+			length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
+		}
+	}
+
+	return 0;
 }
 
-void write_partial(unsigned char* processedOutput, FILE* output, char* path) {
+int decodeChars(unsigned const char input[], unsigned char output[]){
+	char decodedOutput[4] = {};
+	decodedOutput[0] = decodingTable[input[0]];
+	decodedOutput[1] = decodingTable[input[1]];
+	decodedOutput[2] = decodingTable[input[2]];
+	decodedOutput[3] = decodingTable[input[3]];
 
-    if (output != NULL) {
-        while (*processedOutput != '\0'){
-            if (!(fprintf(output,"%c",*processedOutput))) {
-                printf("%c\n", *processedOutput);
-                fprintf(stderr, "Error when writing output to file %s\n", path);
-                exit(1);
-            }
-            ++processedOutput;
-        }
-    } else {
-        fprintf(stderr, "Unable to open or create output file %s\n", path);
-        exit(1);
-    }
+	output[0] = ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
+	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
+		output[1] = '\0';
+		output[2] = '\0';
+		return 1;	
+	}
+	output[1] = (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
+	if(decodedOutput[3] == EQUALS){
+		output[2] = '\0';
+		return 2;
+	}
+	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+	return 3;
 }

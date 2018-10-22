@@ -80,7 +80,7 @@ int parseAction(char* action, char **actionToSave){
     *actionToSave = action;
 
     return 0;
-};
+}
 
 parameters_t getParams(int argc, char **argv){
 
@@ -200,8 +200,7 @@ void process(parameters_t parameters){
         base64_encode(infd,outfd);
     }
     if(strcmp(parameters.action, "decode") == 0) {
-        decode(parameters.input, parameters.path_to_input, parameters.output, parameters.path_to_output);
-        //base64_decode(infd,outfd);
+        base64_decode(infd,outfd);
     }
 
     fclose(parameters.input);
