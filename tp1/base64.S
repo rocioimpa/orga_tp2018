@@ -4,26 +4,62 @@
 # Dicho vector contendra los mensajes de error que las funciones antes mencionadas puedan generar, y cuyo indice es 
 # el codigo de error devuelto por las mismas.
 
+# Tp1 MIPS32 - Organizacion de Computadoras        
+###########################################
+
 #include <mips/regdef.h>
+#include <sys/syscall.h>
 
-.text
-.global exceedsLineSize
-.ent exceedsLineSize
+# Definitions 
+
+# Definitions exceedsLineSize
+
+# Stack Frame size
+# define EXCEEDSLINESIZE_SFSIZE 16
+
+# SRA
+# define EXCEEDSLINESIZE_FP 12
+# define EXCEEDSLINESIZE_GP 8
+
+# LTA
+# define EXCEEDSLINESIZE_RET 0
+
+# ABA
+# define EXCEEDSLINESIZE_ARG0 16
+
+	.text
+	.align 2
+	.globl exceedsLineSize
+	.ent exceedsLineSize
+
 exceedsLineSize:
-	subu sp,sp,16
-	sw gp,12(sp)
-	sw $fp,8(sp)
-	move $fp, sp
+	# Creo el stack frame para la funcion
+    .frame 		$fp, EXCEEDSLINESIZE_SFSIZE, ra
+    .set  		noreorder
+    .cpload 	t9
+    .set  		reorder
+	subu 		sp,sp,EXCEEDSLINESIZE_SFSIZE
+    sw 			$fp, EXCEEDSLINESIZE_FP(sp)     # Guardo fp en stack
+    .cprestore 	EXCEEDSLINESIZE_GP      		# Guardo gp en stack (es como hacer sw gp, POS_GP(sp))
+    move 		$fp, sp                	   		# Muevo sp a $fp
 
-	li t0, 0
-	lw t1, 16($fp)
-	addi t1, t1, -76
-	bnez t1, false
-	li t0, 1
+    sw 			a0, EXCEEDSLINESIZE_ARG0($fp)		# a0 <- charsInLine (lo recibi por parametro)
+
+	li 			t0, 76
+	beq 		a0,t0,true
+
 false:
-	addi v0, t0, 0
-	lw gp, 12($fp)
-	lw $fp, 8($fp)
-	j ra
+	li 			v0,0
+	b 			return_value 
+true: 
+	li 			v0,1
+	b 			return_value
+
+return_value:
+	move 		sp,$fp
+	lw 			gp, EXCEEDSLINESIZE_GP(sp)
+	lw 			$fp, EXCEEDSLINESIZE_FP(sp)
+	addu 		sp,sp,EXCEEDSLINESIZE_SFSIZE
+	j 			ra
 
 .end exceedsLineSize
