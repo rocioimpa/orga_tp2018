@@ -28,26 +28,40 @@ int base64_encode(int infd, int outfd){
 	return 0; 
 }
 
+/*
 int exceedsLineSize(int charsInLine) {
     return (charsInLine == 76) ? 1:0;
+}
+*/
+
+void condition_1_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
+    output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
+    output[3] = encodingTable[input[2] & 0x3F];
+}
+
+void condition_2_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
+    output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
+    output[3] = '=';
+}
+
+void condition_3_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[(input[0] & 0x03) << 4];
+    output[2] = '=';
+    output[3] = '=';
 }
 
 int encodeChars(unsigned const char input[], unsigned char output[], int length) {
     if (length == 3) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
-        output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
-        output[3] = encodingTable[input[2] & 0x3F];
+    	condition_1_encode(input, output);
     } else if (length == 2) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
-        output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
-        output[3] = '=';
+    	condition_2_encode(input, output);
     } else if (length == 1) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[(input[0] & 0x03) << 4];
-        output[2] = '=';
-        output[3] = '=';
+    	condition_3_encode(input, output);
     }
     return 4;
 }
