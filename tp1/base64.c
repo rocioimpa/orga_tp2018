@@ -103,12 +103,12 @@ int base64_decode(int infd, int outfd) {
 	return 0;
 }
 
-void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
+/*void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
 	decodedOutput[0] = decodingTable[input[0]];
 	decodedOutput[1] = decodingTable[input[1]];
 	decodedOutput[2] = decodingTable[input[2]];
 	decodedOutput[3] = decodingTable[input[3]];
-}
+}*/
 
 /*char getOutput0(char decodedOutput[]){
 	return ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));

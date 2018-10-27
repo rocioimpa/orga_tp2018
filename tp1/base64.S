@@ -15,6 +15,7 @@
 	.data
 	.align 0
 	encoding_table_mips:   .byte 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
+	decoding_table_mips:   .byte -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,62,-1,-1,-1,63,52,53,54,55,56,57,58,59,60,61,-1,-1,-1,-3,-1,-1,-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,-1,-1,-1,-1,-1,-1,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 	terminator_char: .byte '='
 
 # Definitions exceedsLineSize
@@ -697,6 +698,82 @@ fin_addZerosToOutput:
 	j ra
 
 .end addZerosToOutput
+
+
+########################################### getDecodedOutput ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define GET_DECODED_OUTPUT_SFSIZE 8
+
+# SRA
+# define GET_DECODED_OUTPUT_FP 4
+# define GET_DECODED_OUTPUT_GP 0
+
+# ABA caller
+# define GET_DECODED_OUTPUT_DECODED_OUTPUT 4
+# define GET_DECODED_OUTPUT_INPUT 8
+# define GET_DECODED_OUTPUT_OUTPUT 12
+
+	.text
+	.align 2
+	.globl getDecodedOutput
+	.ent getDecodedOutput
+getDecodedOutput:
+	.frame $fp, GET_DECODED_OUTPUT_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder 
+
+	subu sp,sp, GET_DECODED_OUTPUT_SFSIZE
+	.cprestore GET_DECODED_OUTPUT_GP
+	sw gp, GET_DECODED_OUTPUT_GP(sp)
+	sw $fp, GET_DECODED_OUTPUT_FP(sp)
+	move $fp, sp
+
+	sw a0, GET_DECODED_OUTPUT_DECODED_OUTPUT($fp)
+	sw a1, GET_DECODED_OUTPUT_INPUT($fp)
+	sw a2, GET_DECODED_OUTPUT_OUTPUT($fp)
+
+	## t0 ==> decodingTable
+	la t0, decoding_table_mips
+	## t1 ==> decodedOutput
+	lw t1, GET_DECODED_OUTPUT_DECODED_OUTPUT($fp)
+	## t2 ==> input
+	lw t2, GET_DECODED_OUTPUT_INPUT($fp)
+	## t3 ==> output
+	lw t3, GET_DECODED_OUTPUT_OUTPUT($fp)
+
+	## t4 ==> i
+	li t4, 0
+
+loop_getDecodedOutput:
+	## t2 ==> input + i
+	addu t2, t2, t4
+	## t5 ==> input[i]
+	lb t5, 0(t2)
+	## t5 ==> decodingTable + input[i]
+	addu t5, t0, t5
+	## t5 ==> decodingTable[input[i]]
+	lb t5, 0(t5)
+	## t1 ==> decodedOutput[i]
+	addu t1, t1, t4
+	## decodedOutput[i] = decodingTable[input[i]]
+	sb t5, 0(t1)
+	## i++
+	addi t4, t4, 1
+	blt t4,4, loop_getDecodedOutput
+
+
+fin_getDecodedOutput:
+	move sp, $fp
+	lw gp, GET_DECODED_OUTPUT_GP($fp)
+	lw $fp, GET_DECODED_OUTPUT_FP($fp)
+	addu sp, sp, GET_DECODED_OUTPUT_SFSIZE
+	j ra
+
+.end getDecodedOutput
 
 
 
