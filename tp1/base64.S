@@ -453,3 +453,251 @@ fin_encode_chars:
 	j ra
 
 .end encode_chars
+
+########################################### getOutput0 ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define GET_OUTPUT_0_SFSIZE 8
+
+# SRA
+# define GET_OUTPUT_0_FP 4
+# define GET_OUTPUT_0_GP 0
+
+# ABA caller
+# define GET_OUTPUT_0_DECODED_OUTPUT 4
+
+	.text
+	.align 2
+	.globl getOutput0
+	.ent getOutput0
+getOutput0:
+	.frame $fp, GET_OUTPUT_0_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder 
+
+	subu sp,sp, GET_OUTPUT_0_SFSIZE
+	.cprestore GET_OUTPUT_0_GP
+	sw gp, GET_OUTPUT_0_GP(sp)
+	sw $fp, GET_OUTPUT_0_FP(sp)
+	move $fp, sp
+
+	sw a0, GET_OUTPUT_0_DECODED_OUTPUT($fp)
+	lw t0, GET_OUTPUT_0_DECODED_OUTPUT($fp)
+
+	## t1 ==> decodedOutput[0]
+	lb t1, 0(t0)
+	## t1 ==> decodedOutput[0] << 2
+	sll t1, t1, 2
+
+	## t2 ==> decodedOutput[1]
+	lb t2, 1(t0)
+	## t2 ==> decodedOutput[1] >> 4
+	srl t2, t2, 4
+
+	## t3 ==> (decodedOutput[0] << 2) | (decodedOutput[1] >> 4)
+	or t3, t1, t2
+
+fin_getOutput0:
+	move v0, t3
+	
+	move sp, $fp
+	lw gp, GET_OUTPUT_0_GP($fp)
+	lw $fp, GET_OUTPUT_0_FP($fp)
+	addu sp, sp, GET_OUTPUT_0_SFSIZE
+	j ra
+
+.end getOutput0
+
+########################################### getOutput1 ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define GET_OUTPUT_1_SFSIZE 8
+
+# SRA
+# define GET_OUTPUT_1_FP 4
+# define GET_OUTPUT_1_GP 0
+
+# ABA caller
+# define GET_OUTPUT_1_DECODED_OUTPUT 4
+
+	.text
+	.align 2
+	.globl getOutput1
+	.ent getOutput1
+getOutput1:
+	.frame $fp, GET_OUTPUT_1_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder 
+
+	subu sp,sp, GET_OUTPUT_1_SFSIZE
+	.cprestore GET_OUTPUT_1_GP
+	sw gp, GET_OUTPUT_1_GP(sp)
+	sw $fp, GET_OUTPUT_1_FP(sp)
+	move $fp, sp
+
+	sw a0, GET_OUTPUT_1_DECODED_OUTPUT($fp)
+	lw t0, GET_OUTPUT_1_DECODED_OUTPUT($fp)
+
+	## t1 ==> decodedOutput[1]
+	lb t1, 1(t0)
+	## t1 ==> decodedOutput[1] & 15
+	and t1, t1, 15
+	## t1 ==> (decodedOutput[1] & 15) << 4
+	sll t1, t1, 4
+
+	## t2 ==> decodedOutput[2]
+	lb t2, 2(t0)
+	## t2 ==> decodedOutput[2] >> 2
+	srl t2, t2, 2
+	## t2 ==> (decodedOutput[2] >> 2) & 15
+	and t2, t2, 15
+	## t3 ==> (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15))
+	or t3, t1, t2
+
+fin_getOutput1:
+	move v0, t3
+	
+	move sp, $fp
+	lw gp, GET_OUTPUT_1_GP($fp)
+	lw $fp, GET_OUTPUT_1_FP($fp)
+	addu sp, sp, GET_OUTPUT_1_SFSIZE
+	j ra
+
+.end getOutput1
+
+########################################### getOutput2 ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define GET_OUTPUT_2_SFSIZE 8
+
+# SRA
+# define GET_OUTPUT_2_FP 4
+# define GET_OUTPUT_2_GP 0
+
+# ABA caller
+# define GET_OUTPUT_2_DECODED_OUTPUT 4
+
+	.text
+	.align 2
+	.globl getOutput2
+	.ent getOutput2
+getOutput2:
+	.frame $fp, GET_OUTPUT_2_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder 
+
+	subu sp,sp, GET_OUTPUT_2_SFSIZE
+	.cprestore GET_OUTPUT_2_GP
+	sw gp, GET_OUTPUT_2_GP(sp)
+	sw $fp, GET_OUTPUT_2_FP(sp)
+	move $fp, sp
+
+	sw a0, GET_OUTPUT_2_DECODED_OUTPUT($fp)
+	lw t0, GET_OUTPUT_2_DECODED_OUTPUT($fp)
+
+	## t1 ==> decodedOutput[2]
+	lb t1, 2(t0)
+	## t1 ==> decodedOutput[2] & 255
+	and t1, t1, 255
+	## t1 ==> (decodedOutput[2] & 255) << 6
+	sll t1, t1, 6
+
+	## t2 ==> decodedOutput[3]
+	lb t2, 3(t0)
+	## t2 ==> decodedOutput[3] >> 63
+	and t2, t2, 63
+
+	## t3 ==> ((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63)
+	or t3, t1, t2
+
+fin_getOutput2:
+	move v0, t3
+	
+	move sp, $fp
+	lw gp, GET_OUTPUT_2_GP($fp)
+	lw $fp, GET_OUTPUT_2_FP($fp)
+	addu sp, sp, GET_OUTPUT_2_SFSIZE
+	j ra
+
+.end getOutput2
+
+
+########################################### addZerosToOutput ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define ADD_ZEROS_TO_OUTPUT_SFSIZE 8
+
+# SRA
+# define ADD_ZEROS_TO_OUTPUT_FP 4
+# define ADD_ZEROS_TO_OUTPUT_GP 0
+
+# ABA caller
+# define ADD_ZEROS_TO_OUTPUT_OUTPUT 4
+# define ADD_ZEROS_TO_OUTPUT_N 8
+
+	.text
+	.align 2
+	.globl addZerosToOutput
+	.ent addZerosToOutput
+addZerosToOutput:
+	.frame $fp, ADD_ZEROS_TO_OUTPUT_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder 
+
+	subu sp,sp, GET_OUTPUT_2_SFSIZE
+	.cprestore ADD_ZEROS_TO_OUTPUT_GP
+	sw gp, ADD_ZEROS_TO_OUTPUT_GP(sp)
+	sw $fp, ADD_ZEROS_TO_OUTPUT_FP(sp)
+	move $fp, sp
+
+	sw a0, ADD_ZEROS_TO_OUTPUT_OUTPUT($fp)
+	sw a1, ADD_ZEROS_TO_OUTPUT_N($fp)
+
+	## t0 ==> &output
+	lw t0, ADD_ZEROS_TO_OUTPUT_OUTPUT($fp)
+	##t1 ==> n
+	lw t1, ADD_ZEROS_TO_OUTPUT_N($fp)
+
+	## t2 ==> 0
+	li t2, 0
+
+	beq t1, 1, size_1
+
+size_2:
+	## output[1] = '\0';
+	sb t2, 1(t0)
+	## output[2] = '\0';
+	sb t2, 2(t0)
+	li v0, 1
+	b fin_addZerosToOutput
+
+size_1:
+	## output[2] = '\0';
+	sb t2, 2(t0)
+	li v0, 2
+	b fin_addZerosToOutput 
+
+fin_addZerosToOutput:
+	move sp, $fp
+	lw gp, ADD_ZEROS_TO_OUTPUT_GP($fp)
+	lw $fp, ADD_ZEROS_TO_OUTPUT_FP($fp)
+	addu sp, sp, ADD_ZEROS_TO_OUTPUT_SFSIZE
+	j ra
+
+.end addZerosToOutput
+
+
+
+

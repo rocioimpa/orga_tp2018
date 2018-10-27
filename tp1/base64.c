@@ -103,24 +103,47 @@ int base64_decode(int infd, int outfd) {
 	return 0;
 }
 
-int decodeChars(unsigned const char input[], unsigned char output[]){
-	char decodedOutput[4] = {};
+void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
 	decodedOutput[0] = decodingTable[input[0]];
 	decodedOutput[1] = decodingTable[input[1]];
 	decodedOutput[2] = decodingTable[input[2]];
 	decodedOutput[3] = decodingTable[input[3]];
+}
 
-	output[0] = ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
-	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
-		output[1] = '\0';
-		output[2] = '\0';
-		return 1;	
-	}
-	output[1] = (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
-	if(decodedOutput[3] == EQUALS){
+/*char getOutput0(char decodedOutput[]){
+	return ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
+}*/
+
+/*char getOutput1(char decodedOutput[]){
+	return (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
+}*/
+
+/*char getOutput2(char decodedOutput[]){
+	return (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+}*/
+
+/*int addZerosToOutput(char output[], int n){
+	if(n==1){
 		output[2] = '\0';
 		return 2;
 	}
-	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+	output[1] = '\0';
+	output[2] = '\0';
+	return 1;
+}*/
+
+int decodeChars(unsigned const char input[], unsigned char output[]){
+	char decodedOutput[4] = {};
+	getDecodedOutput(decodedOutput,input,output);
+
+	output[0] = getOutput0(decodedOutput);
+	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
+		return addZerosToOutput(output,2);
+	}
+	output[1] = getOutput1(decodedOutput);
+	if(decodedOutput[3] == EQUALS){
+		return addZerosToOutput(output,1);
+	}
+	output[2] = getOutput2(decodedOutput);
 	return 3;
 }
