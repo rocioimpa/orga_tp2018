@@ -48,12 +48,14 @@ void condition_2_encode(unsigned const char input[], unsigned char output[]){
     output[3] = '=';
 }
 
+/*
 void condition_3_encode(unsigned const char input[], unsigned char output[]){
     output[0] = encodingTable[input[0] >> 2];
     output[1] = encodingTable[(input[0] & 0x03) << 4];
     output[2] = '=';
     output[3] = '=';
 }
+*/
 
 int encodeChars(unsigned const char input[], unsigned char output[], int length) {
     if (length == 3) {
