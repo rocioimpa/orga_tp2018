@@ -12,6 +12,11 @@
 
 # Definitions 
 
+	.data
+	.align 0
+	encoding_table_mips:   .byte 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
+	terminator_char: .byte '='
+
 # Definitions exceedsLineSize
 
 # Stack Frame size
@@ -64,121 +69,6 @@ return_value:
 
 .end exceedsLineSize
 
-########################################### condition_1_encode_mips.S ########################################
-
-
-# Definitions 
-
-## Definitions encode chars
-
-## Stack Frame size
-# define ENCODE_CHARS_CONDITION_1_SFSIZE 8
-
-# SRA
-# define ENCODE_CHARS_CONDITION_1_FP 4
-# define ENCODE_CHARS_CONDITION_1_GP 0
-
-# ABA
-# define ENCODE_CHARS_CONDITION_1_OUTPUT 12
-# define ENCODE_CHARS_CONDITION_1_INPUT 8
-
-	.data
-	.align 0
-	encoding_table_mips:   .byte 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
-    
-    .text
-    .align 2
-    .globl condition_1_encode_mips
-    .ent condition_1_encode_mips
-
-condition_1_encode_mips:
-	#receta
-	.frame $fp, ENCODE_CHARS_CONDITION_1_SFSIZE, ra ## $fp: registro usado como frame pointer
-    .set noreorder
-    .cpload t9
-    .set reorder
-
-    subu sp, sp, ENCODE_CHARS_CONDITION_1_SFSIZE
-    .cprestore ENCODE_CHARS_CONDITION_1_GP
-    sw gp, ENCODE_CHARS_CONDITION_1_GP(sp)  
-    sw $fp, ENCODE_CHARS_CONDITION_1_FP(sp)
-    move $fp, sp
-
-	#Guardo los argumentos recibidos en el stackframe del invocante
-    sw a0, ENCODE_CHARS_CONDITION_1_INPUT($fp) # input[]
-    sw a1, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) # output[]
-
-    # output[0] = encodingTable[input[0] >> 2];
-    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
-    lb t1, 0(t0) # t1 = input[0]
-    srl t2, t1, 2 # input[0] >> 2
-    la t3, encoding_table_mips
-    addu t4, t3, t2 
-    lb t5, 0(t4) ## t5 = encoding_table_mips[input[0] >> 2]
-    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) ## t0 = output[]
-    sw t5, 0(t0) ## guardo en el stackframe el encoding_table_mips[input >> 2]
-
-    #output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
-    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
-    lb t1, 0(t0) ## t1 = input[0]
-    li t2, 3 # t2 = 3
-    and t1, t1, t2 # t1 = input[0] & 0x03
-    
-    sll t2, t0, 1 #avanzo el indice de input en 1
-    lb t3, 0(t2) #t1 = input[1]
-    srl t3, t3, 4 # t3 = input[1] >> 4
-    addu t1, t1, t3 # t1 = (input[0] & 0x03) + (input[1] >> 4)
-
-    la t2, encoding_table_mips
-    addu t3, t2, t1
-    lb t4, 0(t3) #encoding_table[input[0] & 0x03 + inpuT[1] >> 4]
-    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) #t0 = output
-    sll t0, t0, 1 ## output[1]
-    sb t4, 0(t0)  ## guardo en el stackframe el encoding_table_mips[(input[0] & 0x03) + (input[1] >> 4)]
-
-    #output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
-    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
-    sll t0, t0, 1 #avnazo el indice del input en 1
-    lb t1, 0(t0) ## t1 = input[1]
-    li t2, 0x0f ## t2 = 0x0f
-    and t1, t1, t2 ## input[1] & 0x0f
-    sll t1, t1, 2 ## input[1] & 0x0f << 2
-
-    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
-    sll t0, 2 #avanzo el indice del input en 2
-    lb t2, 0(t0) # t2 = input[2]
-    srl t2, t2, 6 # input[2] >> 6
-    addu t1, t1, t2 ## input[1] & 0x0f << 2 + input[2] >> 6
-
-    la t2, encoding_table_mips
-    addu t3, t2, t1
-    lb t4, 0(t3)  #encoding_table[input[1] & 0x0f << 2 + input[2] >> 6]
-    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp)
-    sll t0, t0, 2 #avanzo el indice del output a 2
-    sb t4, 0(t0) #actualizo el stackframe
-
-    #output[3] = encodingTable[input[2] & 0x3F];
-	lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)    
-	sll t0, t0, 2 #avnazo el indice del input en 2
-	lb t1, 0(t0) ## t1 = input[2]
-	li t2, 0x3f ## t2 = 0x3f
-	and t1, t1, t2
-
-	la t2, encoding_table_mips
-    addu t3, t2, t1
-    lb t2, 0(t3)
-    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp)
-    sll t0, t0, 3 #avanzo el indice del output a 3
-    sb t2, 0(t0) #actualizo el stackframe
-
-fin:	
-	move 		sp,$fp
-	lw 			gp, ENCODE_CHARS_CONDITION_1_GP(sp)
-	lw 			$fp, ENCODE_CHARS_CONDITION_1_FP(sp)
-	addu 		sp, sp, ENCODE_CHARS_CONDITION_1_SFSIZE
-	j 			ra
-
-.end condition_1_encode_mips
 
 ########################################### condition_3_encode_mips.S ########################################
 
@@ -197,10 +87,6 @@ fin:
 # define ENCODE_CHARS_CONDITION_3_OUTPUT 12
 # define ENCODE_CHARS_CONDITION_3_INPUT 8
     
-	.data
-	.align 0
-	terminator_char: .byte '='
-
     .text
     .align 2
     .globl condition_3_encode
@@ -213,8 +99,8 @@ condition_3_encode:
     .cpload t9
     .set reorder
 
-    subu sp, sp, ENCODE_CHARS_CONDITION_1_SFSIZE
-    .cprestore ENCODE_CHARS_CONDITION_1_GP
+    subu sp, sp, ENCODE_CHARS_CONDITION_3_SFSIZE
+    .cprestore ENCODE_CHARS_CONDITION_3_GP
     sw gp, ENCODE_CHARS_CONDITION_3_GP(sp)  
     sw $fp, ENCODE_CHARS_CONDITION_3_FP(sp)
     move $fp, sp
@@ -374,3 +260,117 @@ fin_condition_2:
 	j 			ra
 
 .end condition_2_encode
+
+########################################### condition_1_encode_m ########################################
+
+# Definitions 
+
+## Definitions encode chars
+
+## Stack Frame size
+# define ENCODE_CHARS_CONDITION_1_SFSIZE 8
+
+# SRA
+# define ENCODE_CHARS_CONDITION_1_FP 4
+# define ENCODE_CHARS_CONDITION_1_GP 0
+
+# ABA
+# define ENCODE_CHARS_CONDITION_1_OUTPUT 12
+# define ENCODE_CHARS_CONDITION_1_INPUT 8
+
+    .text
+    .align 2
+    .globl condition_1_encode
+    .ent condition_1_encode
+
+condition_1_encode:
+	#receta
+	.frame $fp, ENCODE_CHARS_CONDITION_1_SFSIZE, ra ## $fp: registro usado como frame pointer
+    .set noreorder
+    .cpload t9
+    .set reorder
+
+    subu sp, sp, ENCODE_CHARS_CONDITION_1_SFSIZE
+    .cprestore ENCODE_CHARS_CONDITION_1_GP
+    sw gp, ENCODE_CHARS_CONDITION_1_GP(sp)  
+    sw $fp, ENCODE_CHARS_CONDITION_1_FP(sp)
+    move $fp, sp
+
+	#Guardo los argumentos recibidos en el stackframe del invocante
+    sw a0, ENCODE_CHARS_CONDITION_1_INPUT($fp) # input[]
+    sw a1, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) # output[]
+
+    # output[0] = encodingTable[input[0] >> 2];
+    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
+    lb t1, 0(t0) # t1 = input[0]
+    srl t1, t1, 2 # input[0] >> 2
+    la t2, encoding_table_mips
+    addu t2, t2, t1 
+    lb t2, 0(t2) ## t5 = encoding_table_mips[input[0] >> 2]
+    
+    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) ## t0 = output[]
+    sw t2, 0(t0) ## guardo en el stackframe el encoding_table_mips[input >> 2]
+
+    #output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
+    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
+    lb t1, 0(t0) ## t1 = input[0]
+    li t2, 0x03 # t2 = 3
+    and t1, t1, t2 # t1 = input[0] & 0x03
+    sll t1, t1, 4 ## input[0] & 0x03 << 4
+    
+    addu t2, t0 ,1 #avanzo el indice de input en 1
+    lb t2, 0(t2) #t2 = input[1]
+    srl t2, t2, 4 # t2 = input[1] >> 4
+    addu t1, t1, t2 # t1 = (input[0] & 0x03) + (input[1] >> 4)
+
+    la t2, encoding_table_mips
+    addu t2, t2, t1
+    lb t2, 0(t2) #t2 = encoding_table[input[0] & 0x03 + inpuT[1] >> 4]
+    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp) #t0 = output
+    addu t0, t0, 1 ## output[1]
+    sb t2, 0(t0)  ## guardo en el stackframe el encoding_table_mips[(input[0] & 0x03) + (input[1] >> 4)]
+
+    #output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
+    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
+    addu t0, t0, 1  #avnazo el indice del input en 1
+    lb t1, 0(t0) ## t1 = input[1]
+    li t2, 0x0f ## t2 = 0x0f
+    and t1, t1, t2 ## input[1] & 0x0f
+    sll t1, t1, 2 ## input[1] & 0x0f << 2
+
+    lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
+	addu t0, t0, 2 #avanzo el indice del input en 2
+    lb t2, 0(t0) # t2 = input[2]
+    srl t2, t2, 6 # input[2] >> 6
+    
+    addu t1, t1, t2 ## input[1] & 0x0f << 2 + input[2] >> 6
+
+    la t2, encoding_table_mips
+    addu t2, t2, t1
+    lb t3, 0(t2)  #t3 = encoding_table[input[1] & 0x0f << 2 + input[2] >> 6]
+    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp)
+    addu t0, t0, 2 #avanzo el indice del output a 2
+    sb t3, 0(t0) #actualizo el stackframe
+
+    #output[3] = encodingTable[input[2] & 0x3F];
+	lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)    
+	addu t0, t0, 2 #avnazo el indice del input en 2
+	lb t1, 0(t0) ## t1 = input[2]
+	li t2, 0x3f ## t2 = 0x3f
+	and t1, t1, t2
+
+	la t2, encoding_table_mips
+    addu t2, t2, t1
+    lb t2, 0(t2) ## encoding_table[input[1] & 0x3f]
+    lw t0, ENCODE_CHARS_CONDITION_1_OUTPUT($fp)
+    addu t0, t0, 3 #avanzo el indice del output a 3
+    sb t2, 0(t0) #actualizo el stackframe
+
+fin_condition_1:	
+	move 		sp,$fp
+	lw 			gp, ENCODE_CHARS_CONDITION_1_GP(sp)
+	lw 			$fp, ENCODE_CHARS_CONDITION_1_FP(sp)
+	addu 		sp, sp, ENCODE_CHARS_CONDITION_1_SFSIZE
+	j 			ra
+
+.end condition_1_encode
