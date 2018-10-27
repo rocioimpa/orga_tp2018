@@ -749,18 +749,18 @@ getDecodedOutput:
 	li t4, 0
 
 loop_getDecodedOutput:
-	## t2 ==> input + i
-	addu t2, t2, t4
+	## t6 ==> input + i
+	addu t6, t2, t4
 	## t5 ==> input[i]
-	lb t5, 0(t2)
+	lb t5, 0(t6)
 	## t5 ==> decodingTable + input[i]
 	addu t5, t0, t5
 	## t5 ==> decodingTable[input[i]]
 	lb t5, 0(t5)
-	## t1 ==> decodedOutput[i]
-	addu t1, t1, t4
+	## t7 ==> decodedOutput[i]
+	addu t7, t1, t4
 	## decodedOutput[i] = decodingTable[input[i]]
-	sb t5, 0(t1)
+	sb t5, 0(t7)
 	## i++
 	addi t4, t4, 1
 	blt t4,4, loop_getDecodedOutput
