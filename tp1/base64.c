@@ -13,7 +13,7 @@ int base64_encode(int infd, int outfd){
     encodedOutput[4] = '\0';
 
     while ( length > 0) {
-        encodeChars(buffer,encodedOutput,length);
+        encode_chars(buffer,encodedOutput,length);
         write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
         charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
 
@@ -61,7 +61,8 @@ void condition_3_encode(unsigned const char input[], unsigned char output[]){
 }
 */
 
-int encodeChars(unsigned const char input[], unsigned char output[], int length) {
+/*
+int encode_chars(unsigned const char input[], unsigned char output[], int length) {
     if (length == 3) {
     	condition_1_encode(input, output);
     } else if (length == 2) {
@@ -71,6 +72,7 @@ int encodeChars(unsigned const char input[], unsigned char output[], int length)
     }
     return 4;
 }
+*/
 
 int base64_decode(int infd, int outfd) {
 	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];

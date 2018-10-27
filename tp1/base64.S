@@ -74,8 +74,6 @@ return_value:
 
 # Definitions 
 
-## Definitions encode chars
-
 ## Stack Frame size
 # define ENCODE_CHARS_CONDITION_3_SFSIZE 8
 
@@ -159,10 +157,7 @@ fin_condition_3:
 
 ########################################### condition_2_encode_mips.S ########################################
 
-
 # Definitions 
-
-## Definitions encode chars
 
 ## Stack Frame size
 # define ENCODE_CHARS_CONDITION_2_SFSIZE 8
@@ -264,8 +259,6 @@ fin_condition_2:
 ########################################### condition_1_encode_m ########################################
 
 # Definitions 
-
-## Definitions encode chars
 
 ## Stack Frame size
 # define ENCODE_CHARS_CONDITION_1_SFSIZE 8
@@ -374,3 +367,89 @@ fin_condition_1:
 	j 			ra
 
 .end condition_1_encode
+
+########################################### encode_chars.mips ########################################
+
+# Definitions 
+
+## Stack Frame size
+# define ENCODE_CHARS_SFSIZE 32
+
+# SRA
+# define ENCODE_CHARS_PADDING 28
+# define ENCODE_CHARS_RA 24
+# define ENCODE_CHARS_FP 20
+# define ENCODE_CHARS_GP 16
+
+# ABA caller
+# define ENCODE_CHARS_LENGHT 40
+# define ENCODE_CHARS_OUTPUT 36
+# define ENCODE_CHARS_INPUT 32
+
+# ABA caller
+# define ENCODE_CHARS_ARG3 12
+# define ENCODE_CHARS_ARG2 8
+# define ENCODE_CHARS_ARG1 4
+# define ENCODE_CHARS_ARG0 0
+
+
+    .text
+    .align 2
+    .globl encode_chars
+    .ent encode_chars
+
+encode_chars:
+	.frame $fp, ENCODE_CHARS_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder
+
+	subu sp, sp, ENCODE_CHARS_SFSIZE
+	.cprestore ENCODE_CHARS_GP
+	sw gp, ENCODE_CHARS_GP(sp)
+	sw ra, ENCODE_CHARS_RA(sp)
+	sw $fp, ENCODE_CHARS_FP(sp)
+	move $fp, sp
+
+	sw a0, ENCODE_CHARS_INPUT($fp)
+	sw a1, ENCODE_CHARS_OUTPUT($fp)
+	sw a2, ENCODE_CHARS_LENGHT($fp)
+
+	lw t0, ENCODE_CHARS_LENGHT($fp)
+	li t1, 3 ## t1 = 3
+	bne t0, t1, encode_chars_jump_cond_2
+	##condition_1_encode(input, output);
+	lw a0, ENCODE_CHARS_INPUT($fp)
+	lw a1, ENCODE_CHARS_OUTPUT($fp)
+	jal condition_1_encode
+	b fin_encode_chars
+
+encode_chars_jump_cond_2:
+	lw t0, ENCODE_CHARS_LENGHT($fp)
+	li t1, 2
+	bne t0, t1, encode_chars_jump_cond_3
+	#condition_2_encode(input, output);
+	lw a0, ENCODE_CHARS_INPUT($fp)
+	lw a1, ENCODE_CHARS_OUTPUT($fp)
+	jal condition_2_encode
+	b fin_encode_chars
+
+encode_chars_jump_cond_3:
+	lw t0, ENCODE_CHARS_LENGHT($fp)
+	li t1, 1
+	bne t0, t1, fin_encode_chars
+	##condition_3_encode(input, output);
+	lw a0, ENCODE_CHARS_INPUT($fp)
+	lw a1, ENCODE_CHARS_OUTPUT($fp)
+	jal condition_3_encode
+
+fin_encode_chars:
+	li v0, 4
+	move sp, $fp
+	lw ra, ENCODE_CHARS_RA(sp)
+	lw gp, ENCODE_CHARS_GP(sp)
+	lw $fp, ENCODE_CHARS_FP(sp)
+	addu sp, sp, ENCODE_CHARS_SFSIZE
+	j ra
+
+.end encode_chars
