@@ -1002,6 +1002,8 @@ decode_chars_frist_if:
 	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	addu t0, t0, 3
 	lb t0, 0(t0)
+	la t1, equals
+	lb t1, 0(t1)
 	bne t0, t1, decode_chars_second_if
 
 	lw a0, DECODE_CHARS_OUTPUT($fp)
@@ -1022,6 +1024,7 @@ decode_chars_second_if:
 	addu t0, t0, 3
 	lb t0, 0(t0)
 	la t1, equals
+	lb t1, 0(t1)
 	bne t1, t0, decode_chars_default_exit
 
 	lw a0, DECODE_CHARS_OUTPUT($fp)
