@@ -9,7 +9,7 @@ void condition_2_encode(unsigned const char[], unsigned char[]);
 void condition_3_encode(unsigned const char[], unsigned char[]);
 int exceedsLineSize(int);
 void decode(FILE*,char*, FILE *, char *);
-int decodeChars(unsigned const char[], unsigned char[]);
+int decode_chars(unsigned const char[], unsigned char[]);
 void getDecodedOutput(char[], unsigned const char[], unsigned char[]);
 char getOutput0(char[]);
 char getOutput1(char[]);

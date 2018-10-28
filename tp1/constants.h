@@ -14,7 +14,7 @@
 	#define BLOCK_SIZE_OUTPUT_DECODING 3
 	#define INVALID_CHAR -1
 	#define WHITESPACE -2
-	#define EQUALS -3
+	//#define EQUALS -3
 
 	extern const unsigned char encodingTable[];
 	extern const char decodingTable[];

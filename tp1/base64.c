@@ -86,7 +86,7 @@ int base64_decode(int infd, int outfd) {
 	length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING);
 
 	while ( length > 0 ) {
-		if((charsDecoded = decodeChars(buffer,decoded_output)) < 0){
+		if((charsDecoded = decode_chars(buffer,decoded_output)) < 0){
 			fprintf(stderr,"Error decoding characters");
 			return -1;
 		}
@@ -107,21 +107,9 @@ int base64_decode(int infd, int outfd) {
 
 /*void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
 	decodedOutput[0] = decodingTable[input[0]];
-	printf("decodedOutput[0]: %d\n", decodedOutput[0]);
-	printf("input[0]: %d\n", input[0]);
-	printf("decodingTable[0]: %d\n", decodingTable[input[0]]);
 	decodedOutput[1] = decodingTable[input[1]];
-	printf("decodedOutput[1]: %d\n", decodedOutput[1]);
-	printf("input[1]: %d\n", input[1]);
-	printf("decodingTable[1]: %d\n", decodingTable[input[1]]);
 	decodedOutput[2] = decodingTable[input[2]];
-	printf("decodedOutput[2]: %d\n", decodedOutput[2]);
-	printf("input[2]: %d\n", input[2]);
-	printf("decodingTable[2]: %d\n", decodingTable[input[2]]);
 	decodedOutput[3] = decodingTable[input[3]];
-	printf("decodedOutput[3]: %d\n", decodedOutput[3]);
-	printf("input[3]: %d\n", input[3]);
-	printf("decodingTable[3]: %d\n", decodingTable[input[3]]);
 }*/
 
 /*char getOutput0(char decodedOutput[]){
@@ -146,7 +134,8 @@ int base64_decode(int infd, int outfd) {
 	return 1;
 }*/
 
-int decodeChars(unsigned const char input[], unsigned char output[]){
+/*
+int decode_chars(unsigned const char input[], unsigned char output[]){
 	char decodedOutput[4] = {};
 	getDecodedOutput(decodedOutput,input,output);
 
@@ -161,3 +150,4 @@ int decodeChars(unsigned const char input[], unsigned char output[]){
 	output[2] = getOutput2(decodedOutput);
 	return 3;
 }
+*/

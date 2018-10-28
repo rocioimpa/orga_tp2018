@@ -615,7 +615,7 @@ fin_encode_chars:
 # define GET_OUTPUT_0_GP 0
 
 # ABA caller
-# define GET_OUTPUT_0_DECODED_OUTPUT 4
+# define GET_OUTPUT_0_DECODED_OUTPUT 8
 
 	.text
 	.align 2
@@ -672,7 +672,7 @@ fin_getOutput0:
 # define GET_OUTPUT_1_GP 0
 
 # ABA caller
-# define GET_OUTPUT_1_DECODED_OUTPUT 4
+# define GET_OUTPUT_1_DECODED_OUTPUT 8
 
 	.text
 	.align 2
@@ -732,7 +732,7 @@ fin_getOutput1:
 # define GET_OUTPUT_2_GP 0
 
 # ABA caller
-# define GET_OUTPUT_2_DECODED_OUTPUT 4
+# define GET_OUTPUT_2_DECODED_OUTPUT 8
 
 	.text
 	.align 2
@@ -792,8 +792,8 @@ fin_getOutput2:
 # define ADD_ZEROS_TO_OUTPUT_GP 0
 
 # ABA caller
-# define ADD_ZEROS_TO_OUTPUT_OUTPUT 4
-# define ADD_ZEROS_TO_OUTPUT_N 8
+# define ADD_ZEROS_TO_OUTPUT_OUTPUT 8
+# define ADD_ZEROS_TO_OUTPUT_N 12
 
 	.text
 	.align 2
@@ -860,9 +860,9 @@ fin_addZerosToOutput:
 # define GET_DECODED_OUTPUT_GP 0
 
 # ABA caller
-# define GET_DECODED_OUTPUT_DECODED_OUTPUT 4
-# define GET_DECODED_OUTPUT_INPUT 8
-# define GET_DECODED_OUTPUT_OUTPUT 12
+# define GET_DECODED_OUTPUT_DECODED_OUTPUT 8
+# define GET_DECODED_OUTPUT_INPUT 12
+# define GET_DECODED_OUTPUT_OUTPUT 16
 
 	.text
 	.align 2
@@ -923,6 +923,126 @@ fin_getDecodedOutput:
 
 .end getDecodedOutput
 
+########################################### decode_chars ########################################
+
+# Definitions 
+
+# ABA caller
+# define DECODE_CHARS_OUTPUT 44
+# define DECODE_CHARS_INPUT 40
+
+
+## Stack Frame size
+# define DECODE_CHARS_SFSIZE 40
+
+# SRA
+# define PADDING 36 
+# define DECODE_CHARS_FP 32
+# define DECODE_CHARS_GP 28
+# define DECODE_CHARS_RA 24
+
+# LTA
+#define DECODE_CHARS_PADDING 20
+#define DECODE_CHARS_DECODED_OUTPUT 16
+
+# ABA
+# define DECODE_CHARS_ARG3 12
+# define DECODE_CHARS_ARG2 8
+# define DECODE_CHARS_ARG1 4
+# define DECODE_CHARS_ARG0 0	
+	.data
+	.align 2
+	decoded_chars_array: .byte 0:4
+	equals: .byte -3
+
+	.text
+	.align 2
+	.ent decode_chars
+	.globl decode_chars
+
+decode_chars:
+	.frame $fp, DECODE_CHARS_SFSIZE, ra
+	.set noreorder
+	.cpload t9
+	.set reorder
+
+	subu sp, sp, DECODE_CHARS_SFSIZE
+	.cprestore DECODE_CHARS_GP
+	sw gp, DECODE_CHARS_GP(sp)
+	sw ra, DECODE_CHARS_RA(sp)
+	sw $fp, DECODE_CHARS_FP(sp)
+	move $fp, sp
+
+	sw a0, DECODE_CHARS_INPUT($fp)
+	sw a1, DECODE_CHARS_OUTPUT($fp)
+
+	la t0, decoded_chars_array
+	lw t0, 0(t0)
+	sw t0, DECODE_CHARS_DECODED_OUTPUT($fp)#guardo el array en el stackframe
+
+	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	jal getOutput0
+
+	lw t0, DECODE_CHARS_OUTPUT($fp)
+	move t1, v0
+	sb t1, 0(t0)
+
+decode_chars_frist_if:
+	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	addu t0, t0, 2
+	la t1, equals
+	lb t1, 0(t1)
+	bne t0, t1, decode_chars_second_if
+
+	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	addu t0, t0, 3
+	bne t0, t1, decode_chars_second_if
+
+	lw a0, DECODE_CHARS_OUTPUT($fp)
+	li a1, 2
+	jal addZerosToOutput
+	b fin_decode_chars
+
+	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	jal getOutput1
+
+	move t0, v0
+	lw t1, DECODE_CHARS_OUTPUT($fp)
+	addu t1, t1, 1
+	sb t0, 0(t1)
+
+decode_chars_second_if:
+	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	addu t0, t0, 3
+	lb t0, 0(t0)
+	la t1, equals
+	bne t1, t0, decode_chars_default_exit
+
+	lw a0, DECODE_CHARS_OUTPUT($fp)
+	li a1, 1
+	jal addZerosToOutput
+	b fin_decode_chars
+
+decode_chars_default_exit:
+	
+	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	jal getOutput2
+
+	move t0, v0
+	lw t1, DECODE_CHARS_OUTPUT($fp)
+	addu t1, t1, 2
+	sb t0, 0(t1)
+	li v0, 3
+
+fin_decode_chars:
+	move sp, $fp
+	lw gp, DECODE_CHARS_GP(sp)
+	lw ra, DECODE_CHARS_RA(sp)
+	lw $fp, DECODE_CHARS_FP(sp)
+	addu sp, sp, DECODE_CHARS_SFSIZE
+	j ra
+
+.end decode_chars
 
 
 
