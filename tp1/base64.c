@@ -13,7 +13,7 @@ int base64_encode(int infd, int outfd){
     encodedOutput[4] = '\0';
 
     while ( length > 0) {
-        encodeChars(buffer,encodedOutput,length);
+        encode_chars(buffer,encodedOutput,length);
         write(outfd,encodedOutput,BLOCK_SIZE_OUTPUT_ENCODING);
         charsInLine += BLOCK_SIZE_OUTPUT_ENCODING;
 
@@ -28,29 +28,51 @@ int base64_encode(int infd, int outfd){
 	return 0; 
 }
 
+/*
 int exceedsLineSize(int charsInLine) {
     return (charsInLine == 76) ? 1:0;
 }
+*/
 
-int encodeChars(unsigned const char input[], unsigned char output[], int length) {
+/*
+void condition_1_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
+    output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
+    output[3] = encodingTable[input[2] & 0x3F];
+}
+*/
+
+/*
+void condition_2_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
+    output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
+    output[3] = '=';
+}
+*/
+
+/*
+void condition_3_encode(unsigned const char input[], unsigned char output[]){
+    output[0] = encodingTable[input[0] >> 2];
+    output[1] = encodingTable[(input[0] & 0x03) << 4];
+    output[2] = '=';
+    output[3] = '=';
+}
+*/
+
+/*
+int encode_chars(unsigned const char input[], unsigned char output[], int length) {
     if (length == 3) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
-        output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
-        output[3] = encodingTable[input[2] & 0x3F];
+    	condition_1_encode(input, output);
     } else if (length == 2) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
-        output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
-        output[3] = '=';
+    	condition_2_encode(input, output);
     } else if (length == 1) {
-        output[0] = encodingTable[input[0] >> 2];
-        output[1] = encodingTable[(input[0] & 0x03) << 4];
-        output[2] = '=';
-        output[3] = '=';
+    	condition_3_encode(input, output);
     }
     return 4;
 }
+*/
 
 int base64_decode(int infd, int outfd) {
 	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];
@@ -81,24 +103,59 @@ int base64_decode(int infd, int outfd) {
 	return 0;
 }
 
-int decodeChars(unsigned const char input[], unsigned char output[]){
-	char decodedOutput[4] = {};
+/*void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
 	decodedOutput[0] = decodingTable[input[0]];
+	printf("decodedOutput[0]: %d\n", decodedOutput[0]);
+	printf("input[0]: %d\n", input[0]);
+	printf("decodingTable[0]: %d\n", decodingTable[input[0]]);
 	decodedOutput[1] = decodingTable[input[1]];
+	printf("decodedOutput[1]: %d\n", decodedOutput[1]);
+	printf("input[1]: %d\n", input[1]);
+	printf("decodingTable[1]: %d\n", decodingTable[input[1]]);
 	decodedOutput[2] = decodingTable[input[2]];
+	printf("decodedOutput[2]: %d\n", decodedOutput[2]);
+	printf("input[2]: %d\n", input[2]);
+	printf("decodingTable[2]: %d\n", decodingTable[input[2]]);
 	decodedOutput[3] = decodingTable[input[3]];
+	printf("decodedOutput[3]: %d\n", decodedOutput[3]);
+	printf("input[3]: %d\n", input[3]);
+	printf("decodingTable[3]: %d\n", decodingTable[input[3]]);
+}*/
 
-	output[0] = ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
-	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
-		output[1] = '\0';
-		output[2] = '\0';
-		return 1;	
-	}
-	output[1] = (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
-	if(decodedOutput[3] == EQUALS){
+/*char getOutput0(char decodedOutput[]){
+	return ((decodedOutput[0] << 2) | (decodedOutput[1] >> 4));
+}*/
+
+/*char getOutput1(char decodedOutput[]){
+	return (((decodedOutput[1] & 15) << 4) | ((decodedOutput[2] >> 2) & 15));
+}*/
+
+/*char getOutput2(char decodedOutput[]){
+	return (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+}*/
+
+/*int addZerosToOutput(char output[], int n){
+	if(n==1){
 		output[2] = '\0';
 		return 2;
 	}
-	output[2] = (((decodedOutput[2] & 255) << 6) | ((decodedOutput[3]) & 63));
+	output[1] = '\0';
+	output[2] = '\0';
+	return 1;
+}*/
+
+int decodeChars(unsigned const char input[], unsigned char output[]){
+	char decodedOutput[4] = {};
+	getDecodedOutput(decodedOutput,input,output);
+
+	output[0] = getOutput0(decodedOutput);
+	if(decodedOutput[2] == EQUALS && decodedOutput[3] == EQUALS){
+		return addZerosToOutput(output,2);
+	}
+	output[1] = getOutput1(decodedOutput);
+	if(decodedOutput[3] == EQUALS){
+		return addZerosToOutput(output,1);
+	}
+	output[2] = getOutput2(decodedOutput);
 	return 3;
 }
