@@ -977,25 +977,31 @@ decode_chars:
 	sw a1, DECODE_CHARS_OUTPUT($fp)
 
 	la t0, decoded_chars_array
-	lw t0, 0(t0)
 	sw t0, DECODE_CHARS_DECODED_OUTPUT($fp)#guardo el array en el stackframe
+
+	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
+	lw a1, DECODE_CHARS_INPUT($fp)
+	lw a2, DECODE_CHARS_OUTPUT($fp)
+	jal getDecodedOutput
 
 	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	jal getOutput0
 
-	lw t0, DECODE_CHARS_OUTPUT($fp)
 	move t1, v0
+	lw t0, DECODE_CHARS_OUTPUT($fp)
 	sb t1, 0(t0)
 
 decode_chars_frist_if:
 	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	addu t0, t0, 2
+	lb t0, 0(t0)
 	la t1, equals
 	lb t1, 0(t1)
 	bne t0, t1, decode_chars_second_if
 
 	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	addu t0, t0, 3
+	lb t0, 0(t0)
 	bne t0, t1, decode_chars_second_if
 
 	lw a0, DECODE_CHARS_OUTPUT($fp)
@@ -1003,6 +1009,7 @@ decode_chars_frist_if:
 	jal addZerosToOutput
 	b fin_decode_chars
 
+decode_chars_second_if:
 	lw a0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	jal getOutput1
 
@@ -1011,7 +1018,6 @@ decode_chars_frist_if:
 	addu t1, t1, 1
 	sb t0, 0(t1)
 
-decode_chars_second_if:
 	lw t0, DECODE_CHARS_DECODED_OUTPUT($fp)
 	addu t0, t0, 3
 	lb t0, 0(t0)
