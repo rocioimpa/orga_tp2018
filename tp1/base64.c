@@ -76,6 +76,7 @@ int encode_chars(unsigned const char input[], unsigned char output[], int length
 }
 */
 
+/*
 int base64_decode(int infd, int outfd) {
 	unsigned char buffer[BLOCK_SIZE_INPUT_DECODING];
 	unsigned char decoded_output[BLOCK_SIZE_OUTPUT_DECODING];
@@ -104,6 +105,7 @@ int base64_decode(int infd, int outfd) {
 
 	return 0;
 }
+*/
 
 /*void getDecodedOutput(char decodedOutput[], unsigned const char input[], unsigned char output[]){
 	decodedOutput[0] = decodingTable[input[0]];

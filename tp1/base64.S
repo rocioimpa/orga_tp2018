@@ -1065,11 +1065,13 @@ fin_decode_chars:
 # define BASE64_DECODE_SFSIZE 56
 
 # SRA
+# define BASE64_DECODE_PADDING_2 52
 # define BASE64_DECODE_FP 48
 # define BASE64_DECODE_GP 44
 # define BASE64_DECODE_RA 40
 
 # LTA
+#define BASE64_DECODE_PADDING_1 36
 #define BASE64_DECODE_BUFFER 32
 #define BASE64_DECODE_DECODED_OUTPUT 28
 #define BASE64_DECODE_CHARS_DECODED 24
@@ -1077,6 +1079,7 @@ fin_decode_chars:
 #define BASE64_DECODE_LENGTH 16
 
 # ABA
+# define DECODE_CHARS_ARG3 12
 # define DECODE_CHARS_ARG2 8
 # define DECODE_CHARS_ARG1 4
 # define DECODE_CHARS_ARG0 0    
@@ -1084,6 +1087,7 @@ fin_decode_chars:
     .align 2
     base64_decode_buffer: .byte 0:4
     base64_decode_decoded_output: .byte 0:3
+    base64_decode_block_size_input_decoding: .word  4
 
     .text
     .align 2
@@ -1125,20 +1129,76 @@ base64_decode:
     sw t0, BASE64_DECODE_LENGTH($fp)
 
     ## length = read(infd,buffer,BLOCK_SIZE_INPUT_DECODING)
+	li 	v0, SYS_read
     lw a0, BASE64_DECODE_INFD($fp)
     lw a1, BASE64_DECODE_BUFFER($fp)
-    li a2, BLOCK_SIZE_INPUT_DECODING
-    jal read
-    sw v0, BASE64_DECODE_LENGTH($fp)
+    la a2, base64_decode_block_size_input_decoding
+    lw a2, 0(a2)
+    syscall
+    move t0, v0
+    sw t0, BASE64_DECODE_LENGTH($fp)
 
 loop_base64_decode:
+	lw t0, BASE64_DECODE_LENGTH($fp)
+	blez t0, base64_decode_fin_loop
+
     ## charsDecoded = decode_chars(buffer,decoded_output)
     lw a0, BASE64_DECODE_BUFFER($fp)
     lw a1, BASE64_DECODE_DECODED_OUTPUT($fp)
     jal decode_chars
-    sw v0, BASE64_DECODE_CHARS_DECODED($fp)
+    move t0, v0
+    sw t0, BASE64_DECODE_CHARS_DECODED($fp)
+    
+    lw t0, BASE64_DECODE_CHARS_DECODED($fp)
+    blez t0, base64_decode_error
 
-    ## seguir
+    li v0, SYS_write
+    lw a0, BASE64_DECODE_OUTFD($fp)
+    lw a1, BASE64_DECODE_DECODED_OUTPUT($fp)
+    lw a2, BASE64_DECODE_CHARS_DECODED($fp)
+    syscall
+
+	la t0, base64_decode_block_size_input_decoding    
+	lw t0, 0(t0)
+	lw t1, BASE64_DECODE_CHARS_IN_LINE($fp)
+	addu t1, t1, t0
+	sw t1, BASE64_DECODE_CHARS_IN_LINE($fp)
+
+	lw a0, BASE64_DECODE_CHARS_IN_LINE($fp)
+	jal exceedsLineSize
+	move t0, v0
+	li t1, 1
+	bne t0, t1, base64_decode_no_read_if
+
+	li v0, SYS_read
+	lw a0, BASE64_DECODE_INFD($fp)
+	lw a1, BASE64_DECODE_BUFFER($fp)
+	li a2, 1
+	syscall
+
+	move t0, v0
+	sw t0, BASE64_DECODE_LENGTH($fp)
+	li t0, 0
+	sw t0, BASE64_DECODE_CHARS_IN_LINE($fp)
+
+base64_decode_no_read_if:
+	li v0, SYS_read
+	lw a0, BASE64_DECODE_INFD($fp)
+	lw a1, BASE64_DECODE_BUFFER($fp)
+	la a2, base64_decode_block_size_input_decoding 
+	lw a2, 0(a2)
+	syscall
+
+	move t0, v0
+	sw t0, BASE64_DECODE_LENGTH($fp)
+	b loop_base64_decode
+
+base64_decode_error:
+	li v0, -1
+	b fin_base64_decode
+
+base64_decode_fin_loop:
+	li v0, 0
 
 fin_base64_decode:
     move sp, $fp
@@ -1149,4 +1209,3 @@ fin_base64_decode:
     j ra
 
 .end base64_decode
-
