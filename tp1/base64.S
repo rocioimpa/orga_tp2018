@@ -31,8 +31,11 @@
 # define BASE64_ENCODE_LEN 0 
 
 # ABA
-# BASE64_ENCODE_ARG0 40
-# BASE64_ENCODE_ARG1 44
+# define BASE64_ENCODE_ARG0 40
+# define BASE64_ENCODE_ARG1 44
+
+new_line_char:
+    .ascii "\n\000"
 
 	.text
 	.align 2
@@ -44,40 +47,116 @@ base64_encode:
 	.set 		noreorder
 	.cpload 	t9
 	.set 		reorder
+
 	subu 		sp, sp, BASE64_ENCODE_SFSIZE
 	sw			ra, BASE64_ENCODE_RA(sp)
 	sw 			$fp, BASE64_ENCODE_FP(sp)
-	.cprestore	BASE64_ENCODE_GP
-	move 		$fp, sp
+	
+    .cprestore	BASE64_ENCODE_GP
+	
+    move 		$fp, sp
 
-	sw 			a0, BASE64_ENCODE_ARG0($fp) 	#a0 <- input
-	sw 			a1, BASE64_ENCODE_ARG1($fp)		#a1 <- output
+	sw 			a0, BASE64_ENCODE_ARG0($fp) # a0 <- input
+	sw 			a1, BASE64_ENCODE_ARG1($fp)	# a1 <- output
 
 	li 			t0,0
-	sw			t0,BASE64_ENCODE_CIL($fp) #charsInLine = 0
+	sw			t0,BASE64_ENCODE_CIL($fp) # charsInLine = 0
 
 	li 			t0,3
-	sw			t0,BASE64_ENCODE_BUF_SIZE_IN
+	sw			t0,BASE64_ENCODE_BUF_SIZE_IN($fp) # BLOCK_SIZE_INPUT = 3
 
 	li 			t0,4
-	sw 			t0,BASE64_ENCODE_BUF_SIZE_OUT
+	sw 			t0,BASE64_ENCODE_BUF_SIZE_OUT($fp) # BLOCK_SIZE_INPUT = 4
 
-read: 
+read_input: 
 	addiu 		t0, $fp, BASE64_ENCODE_BUF_IN
 
 	li 			v0, SYS_read
 	lw 			a0, BASE64_ENCODE_ARG0($fp)
 	move 		a1, t0
-	lw 			a2, BASE64_ENCODE_BUF_SIZE_IN($fp)
-	syscall
+    lw          a2, BASE64_ENCODE_BUF_SIZE_IN($fp)
+    syscall
+    sw          v0, BASE64_ENCODE_LEN($fp)
 
-	sw 			v0, BASE64_ENCODE_LEN($fp)
-	lw 			t0, BASE64_ENCODE_BUF_IN($fp)
+    lw          t1, BASE64_ENCODE_LEN($fp)
+	bgtz		t1, while_loop_encode
+	b 			end_while_loop_encode
 
-	bgtz		v0, while_loop
-	b 			end_while
+while_loop_encode:
+    ##          encode(buffer_input, buffer_output, length);
+    addiu       t0, $fp, BASE64_ENCODE_BUF_IN   
+    addiu       t1, $fp, BASE64_ENCODE_BUF_OUT  
 
+    move        a0, t0  
+    move        a1, t1  
+    lw          a2, BASE64_ENCODE_LEN($fp)      
+    la          t9, encode_chars
+    jal         ra, t9
 
+    ##          charsInLine += BLOCK_SIZE_OUTPUT;
+    lw          t0, BASE64_ENCODE_CIL($fp)        
+    lw          t1, BASE64_ENCODE_BUF_SIZE_OUT($fp)       
+    addu        t0, t0, t1            
+    sw          t0, BASE64_ENCODE_CIL($fp)
+
+    ##          write(output_fd, buffer_output, BLOCK_SIZE_OUTPUT);
+    addiu       t0, $fp, BASE64_ENCODE_BUF_OUT   
+
+    li          v0, SYS_write           
+    lw          a0, BASE64_ENCODE_ARG1($fp)       
+    move        a1, t0                
+    lw          a2, BASE64_ENCODE_BUF_SIZE_OUT($fp)     
+    syscall
+
+    ##          if (exceedsLineSize(charsInLine) == 1) 
+    lw          v0, BASE64_ENCODE_CIL($fp) 
+    la          t9, exceedsLineSize
+    jal         ra, t9
+
+    lw          a0, BASE64_ENCODE_ARG0($fp)
+    bgez        a0, exceeds_76_chars   
+    
+    j           end_if
+
+exceeds_76_chars:
+    ##          write(output_fd, "\n", 1);
+    la          t0, new_line_char        
+    li          t1, 1        
+
+    li          v0, SYS_write            
+    lw          a0, BASE64_ENCODE_ARG1($fp)   
+
+    sw          zero, BASE64_ENCODE_CIL($fp) # reinicio el valor de charsInLine = 0;
+
+end_if:
+    ##          length = read(input_fd, buffer_input, BLOCK_SIZE_INPUT);
+    b           read_input  
+
+end_while_loop_encode:
+    lw          t0, BASE64_ENCODE_CIL($fp)      
+    beq         t0, zero, return  
+
+    ##          write(output_fd, "\n", 1);
+    la          t0, new_line_char         
+    li          t1, 1                   
+
+    li          v0, SYS_write            
+    lw          a0, BASE64_ENCODE_ARG1($fp)      
+
+    b           return
+
+return:
+    move        v0, zero            
+
+end_base64_encode:
+    move        sp, $fp                
+    lw          gp, BASE64_ENCODE_GP(sp)    
+    lw          $fp, BASE64_ENCODE_FP(sp)   
+    lw          ra, BASE64_ENCODE_RA(sp)    
+    addu        sp, sp, BASE64_ENCODE_SFSIZE
+    jr          ra                       
+
+    .end    base64_encode
 
 ####################################
 
