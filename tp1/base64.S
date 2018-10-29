@@ -258,7 +258,7 @@ condition_3_encode:
 
     ##   output[0] = encodingTable[input[0] >> 2];
 	lw t0, ENCODE_CHARS_CONDITION_3_INPUT($fp)
-	lb t1, 0(t0) #input[0]
+	lbu t1, 0(t0) #input[0]
 	srl t1, t1, 2 # input[0] >> 2
 	la t2, encoding_table_mips ## cargo encoding_table en t1
 	addu t2, t2, t1 ## avanzo el indice input[0] >> 2 veces
@@ -269,7 +269,7 @@ condition_3_encode:
 
 	##output[1] = encodingTable[(input[0] & 0x03) << 4];
 	lw t0, ENCODE_CHARS_CONDITION_3_INPUT($fp)
-	lb t1, 0(t0) ## input[0]
+	lbu t1, 0(t0) ## input[0]
 	li t2, 0x03
 	and t1, t1, t2 ## input[1] & 0x03
 	sll t1, t1, 4 ##input[1] & 0x03 << 4
@@ -343,7 +343,7 @@ condition_2_encode:
 
     ##output[0] = encodingTable[input[0] >> 2];
 	lw t0, ENCODE_CHARS_CONDITION_2_INPUT($fp)
-	lb t1, 0(t0) #input[0]
+	lbu t1, 0(t0) #input[0]
 	srl t1, t1, 2 # input[0] >> 2
 	la t2, encoding_table_mips ## cargo encoding_table en t1
 	addu t2, t2, t1 ## avanzo el indice input[0] >> 2 veces
@@ -354,13 +354,13 @@ condition_2_encode:
 
 	##output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
 	lw t0, ENCODE_CHARS_CONDITION_2_INPUT($fp)
-	lb t1, 0(t0) ## t1 = input[0]
+	lbu t1, 0(t0) ## t1 = input[0]
 	li t2, 0x03
 	and t1, t1, t2 ## input[0] & 0x03
 	sll t1, t1, 4 ## (input[0] & 0x03) << 4
 
 	addu t2, t0, 1
-	lb t2, 0(t2) ## input[1]
+	lbu t2, 0(t2) ## input[1]
 	srl t2, t2, 4 ## input[1] >> 4
 
 	addu t1, t1, t2 ## ((input[0] & 0x03) << 4) + (input[1] >> 4)
@@ -376,7 +376,7 @@ condition_2_encode:
 	##output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
 	lw t0, ENCODE_CHARS_CONDITION_2_INPUT($fp)
 	addu t0, t0, 1 ##avanzo el indice del input en 1
-	lb t1, 0(t0) ## t1 = input[1]
+	lbu t1, 0(t0) ## t1 = input[1]
 	li t2, 0x0F
 	and t1, t1, t2 ## input[1] & 0x0F
 	sll t1, t1, 2 ## (input[1] & 0x0F) << 2
@@ -444,7 +444,7 @@ condition_1_encode:
 
     # output[0] = encodingTable[input[0] >> 2];
     lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
-    lb t1, 0(t0) # t1 = input[0]
+    lbu t1, 0(t0) # t1 = input[0]
     srl t1, t1, 2 # input[0] >> 2
     la t2, encoding_table_mips
     addu t2, t2, t1 
@@ -455,13 +455,13 @@ condition_1_encode:
 
     #output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
     lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp) #cargo la direccion del input en t0
-    lb t1, 0(t0) ## t1 = input[0]
+    lbu t1, 0(t0) ## t1 = input[0]
     li t2, 0x03 # t2 = 3
     and t1, t1, t2 # t1 = input[0] & 0x03
     sll t1, t1, 4 ## input[0] & 0x03 << 4
     
     addu t2, t0 ,1 #avanzo el indice de input en 1
-    lb t2, 0(t2) #t2 = input[1]
+    lbu t2, 0(t2) #t2 = input[1]
     srl t2, t2, 4 # t2 = input[1] >> 4
     addu t1, t1, t2 # t1 = (input[0] & 0x03) + (input[1] >> 4)
 
@@ -475,14 +475,14 @@ condition_1_encode:
     #output[2] = encodingTable[((input[1] & 0x0f) << 2) + (input[2] >> 6)];
     lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
     addu t0, t0, 1  #avnazo el indice del input en 1
-    lb t1, 0(t0) ## t1 = input[1]
+    lbu t1, 0(t0) ## t1 = input[1]
     li t2, 0x0f ## t2 = 0x0f
     and t1, t1, t2 ## input[1] & 0x0f
     sll t1, t1, 2 ## input[1] & 0x0f << 2
 
     lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)
 	addu t0, t0, 2 #avanzo el indice del input en 2
-    lb t2, 0(t0) # t2 = input[2]
+    lbu t2, 0(t0) # t2 = input[2]
     srl t2, t2, 6 # input[2] >> 6
     
     addu t1, t1, t2 ## input[1] & 0x0f << 2 + input[2] >> 6
@@ -497,7 +497,7 @@ condition_1_encode:
     #output[3] = encodingTable[input[2] & 0x3F];
 	lw t0, ENCODE_CHARS_CONDITION_1_INPUT($fp)    
 	addu t0, t0, 2 #avnazo el indice del input en 2
-	lb t1, 0(t0) ## t1 = input[2]
+	lbu t1, 0(t0) ## t1 = input[2]
 	li t2, 0x3f ## t2 = 0x3f
 	and t1, t1, t2
 

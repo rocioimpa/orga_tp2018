@@ -45,14 +45,14 @@ void condition_1_encode(unsigned const char input[], unsigned char output[]){
 }
 */
 
-/*
-void condition_2_encode(unsigned const char input[], unsigned char output[]){
+
+/*void condition_2_encode(unsigned const char input[], unsigned char output[]){
     output[0] = encodingTable[input[0] >> 2];
     output[1] = encodingTable[((input[0] & 0x03) << 4) + (input[1] >> 4)];
     output[2] = encodingTable[(input[1] & 0x0F) << 2 ];
     output[3] = '=';
-}
-*/
+}*/
+
 
 /*
 void condition_3_encode(unsigned const char input[], unsigned char output[]){
