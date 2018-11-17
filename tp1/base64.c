@@ -5,8 +5,8 @@
 #include "constants.h"
 #include "base64.h"
 
-/*
-int base64_encode(int infd, int outfd){
+
+/*int base64_encode(int infd, int outfd){
     unsigned char buffer[BLOCK_SIZE_INPUT_ENCODING];
     unsigned char encodedOutput[BLOCK_SIZE_OUTPUT_ENCODING];
     int charsInLine = 0;
