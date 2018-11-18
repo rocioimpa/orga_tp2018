@@ -27,8 +27,8 @@
     }
 
 	return 0; 
-}
-*/
+}*/
+
 
 /*
 int exceedsLineSize(int charsInLine) {
